@@ -72,3 +72,14 @@ def buscar_valor_total_vendas(cliente: str, usuario_id: int) -> float:
     resultado = cursor.fetchone()
     conn.close()
     return resultado[0] or 0.0
+
+def somar_valor_parcelas_da_venda(venda_id: int, usuario_id: int) -> float:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT SUM(valor) FROM parcelas
+        WHERE venda_id = ? AND usuario_id = ?
+    """, (venda_id, usuario_id))
+    resultado = cursor.fetchone()
+    conn.close()
+    return resultado[0] or 0.0

@@ -27,18 +27,20 @@ def listar_categorias(usuario_id: int) -> list[tuple]:
 
 def deletar_categoria(categoria_id: int, usuario_id: int):
     conn = get_connection()
-    conn.execute("""
+    cursor = conn.execute("""
         DELETE FROM categorias
         WHERE id = ? AND usuario_id = ?
     """, (categoria_id, usuario_id))
     conn.commit()
     conn.close()
+    return cursor.rowcount > 0
 
 def renomear_categoria(categoria_id: int, novo_nome: str, usuario_id: int):
     conn = get_connection()
-    conn.execute("""
+    cursor = conn.execute("""
         UPDATE categorias SET nome = ?
         WHERE id = ? AND usuario_id = ?
     """, (novo_nome.strip(), categoria_id, usuario_id))
     conn.commit()
     conn.close()
+    return cursor.rowcount > 0

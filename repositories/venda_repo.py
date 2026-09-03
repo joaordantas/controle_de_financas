@@ -38,3 +38,15 @@ def listar_clientes(usuario_id: int) -> list[str]:
     clientes = [row[0] for row in cursor.fetchall()]
     conn.close()
     return clientes
+
+def buscar_venda_por_id(venda_id: int, usuario_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, cliente, tipo, valor_total, comentario, data
+        FROM vendas
+        WHERE id = ? AND usuario_id = ?
+    """, (venda_id, usuario_id))
+    venda = cursor.fetchone()
+    conn.close()
+    return venda

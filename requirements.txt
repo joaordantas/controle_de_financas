@@ -1,3 +1,7 @@
 streamlit
 pandas
 bcrypt
+fastapi
+uvicorn
+email-validator
+httpx

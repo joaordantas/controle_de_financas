@@ -1,168 +1,86 @@
-# 💰 Controle de Finanças
+# Controle de Financas
 
-Sistema web desenvolvido com Python + Streamlit para controle financeiro pessoal e gestão de serviços/vendas para autônomos.
+Projeto pessoal em evolucao para controle financeiro, vendas e cobrancas.
 
-O projeto começou como um simples controle financeiro pessoal e está evoluindo para um mini ERP focado em:
-- organização financeira
-- controle de vendas
-- cobranças
-- parcelamentos
-- relatórios de lucro
-- multiusuário
+## Estado atual
+- App legado em Streamlit continua disponivel em `app.py`
+- Nova API em FastAPI criada em `backend/`
+- Novo frontend React + TypeScript criado em `frontend/`
+- Banco SQLite continua em `storage/banco.db`
 
----
+## Objetivo da migracao
+Migrar gradualmente do Streamlit para uma interface propria em React, mantendo o backend em Python e transformando a logica atual em uma API reutilizavel.
 
-# 🚀 Tecnologias Utilizadas
+## Estrutura principal
+```text
+backend/      -> nova API FastAPI
+frontend/     -> nova interface React + TypeScript
+database/     -> conexao e schema SQLite
+repositories/ -> acesso a dados
+services/     -> regras de negocio
+storage/      -> banco SQLite
+app.py        -> app legado em Streamlit
+```
 
-- Python
-- Streamlit
-- SQLite
-- Pandas
+## O que ja foi iniciado
+- Rotas de autenticacao
+- Rotas de categorias
+- Rotas de transacoes
+- Rotas de dashboard
+- Rotas de vendas e parcelas
+- Estrutura visual inicial em React
+- Refatoracao inicial dos services
+- Fluxo atomico para pagamento de parcela + lancamento financeiro
 
----
-
-# 📌 Funcionalidades Atuais
-
-## 🔐 Sistema de Login
-- Cadastro de usuários
-- Login individual
-- Sessão por usuário
-- Isolamento de dados por conta
-
----
-
-## 💰 Financeiro
-- Adicionar entradas e saídas
-- Histórico de transações
-- Categorias financeiras
-- Controle de saldo
-- Limites financeiros
-- Banco de dados SQLite
-
----
-
-## 🛠 Serviços e Vendas
-- Cadastro de vendas/serviços
-- Controle de clientes
-- Parcelamento de vendas
-- Controle de parcelas pagas e pendentes
-- Histórico de cobranças
-- Integração automática com financeiro
-
----
-
-## 📊 Relatórios
-- Controle de lucro
-- Organização financeira por período
-- Estrutura para:
-  - diário
-  - semanal
-  - mensal
-
----
-
-# 🧠 Objetivo do Projeto
-
-Criar uma plataforma simples e eficiente para:
-- autônomos
-- vendedores
-- pequenos prestadores de serviço
-
-Com foco em:
-- facilidade de uso
-- organização financeira
-- controle de cobranças
-- produtividade
-
----
-
-# 🏗 Estrutura Atual do Projeto
-
+## Como rodar o backend
+1. Crie e ative um ambiente virtual
+2. Instale dependencias:
 ```bash
-controle_de_financas/
-│
-├── app.py
-├── database.py
-├── storage/
-│   └── banco.db
-├── requirements.txt
-└── README.md
-
-🔥 Funcionalidades em Desenvolvimento
-
-📌 UX e Interface
-Sidebar profissional
-Dashboard financeiro
-Melhor experiência visual
-Sistema sem IDs manuais
-
-📌 Gestão Avançada
-Categorias personalizadas
-Limites mensais dinâmicos
-Dashboard de faturamento
-Controle de lucro diário/semanal/mensal
-
-📌 Serviços
-Perfil de autônomo
-Áreas de atuação
-Sistema de cobranças
-Alertas de pagamentos pendentes
-
-📌 Arquitetura
-Separação em services/repositories
-Melhor organização de código
-Escalabilidade do sistema
-
-📷 Preview
-Tela Financeira
-Controle de entradas e saídas
-Histórico financeiro
-Limites financeiros
-Tela de Serviços
-Cadastro de vendas
-Parcelas
-Controle de cobranças 
-
-▶️ Como Executar o Projeto
-
-1. Clone o repositório:
-git clone https://github.com/joaordantas/controle_de_financas.git
-
-2. Entre na pasta:
-cd controle_de_financas
-
-3. Instale as dependências:
 pip install -r requirements.txt
+```
+3. Rode a API:
+```bash
+uvicorn backend.main:app --reload
+```
 
-4. Execute o projeto:
+## Como rodar o frontend
+Requisito: ter Node.js e npm instalados.
+
+1. Entre na pasta do frontend:
+```bash
+cd frontend
+```
+2. Instale dependencias:
+```bash
+npm install
+```
+3. Rode o projeto:
+```bash
+npm run dev
+```
+
+Frontend padrao:
+- URL: `http://localhost:5173`
+- API esperada: `http://127.0.0.1:8000`
+
+Se quiser trocar a URL da API depois, crie um `.env` no `frontend/` com:
+```bash
+VITE_API_URL=http://127.0.0.1:8000
+```
+
+## Como rodar o app antigo
+```bash
 streamlit run app.py
+```
 
-🌐 Deploy
+## Proximos passos sugeridos
+- Testar a API rota por rota
+- Instalar Node.js para validar o frontend
+- Migrar o login real na nova interface
+- Migrar categorias e financeiro por fluxo completo
+- Revisar o app Streamlit para consumir services mais claros quando fizer sentido
 
-O projeto está hospedado via Streamlit Cloud.
-
-📈 Status do Projeto
-
-🚧 Em desenvolvimento contínuo.
-
-Atualmente focado em:
-
-estabilidade
-multiusuário
-integração entre módulos
-experiência do usuário
-👨‍💻 Desenvolvedor
-
-João Dantas
-
-GitHub:
-https://github.com/joaordantas
-
-📌 Observação
-
-Este projeto está sendo utilizado tanto como:
-
-projeto pessoal
-estudo de engenharia de software
-construção de portfólio
-possível produto SaaS futuro
+## Guias de estudo
+- `docs/trilha-estudos.md`
+- `docs/anotacoes-projeto.md`
+- `docs/comandos-uteis.md`
