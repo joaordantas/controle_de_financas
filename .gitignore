@@ -3,6 +3,7 @@ __pycache__/
 .venv/
 node_modules/
 dist/
+*.tsbuildinfo
 storage/*.db
 .pytest_cache/
 .mypy_cache/
