@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -14,7 +16,7 @@ criar_banco()
 app = FastAPI(
     title="Controle de Financas API",
     version="0.1.0",
-    description="API inicial para a migracao gradual do projeto Streamlit para React + FastAPI.",
+    description="API do assistente financeiro pessoal.",
 )
 
 app.add_middleware(
@@ -33,9 +35,14 @@ app.include_router(dashboard_router)
 app.include_router(sales_router)
 
 
-@app.get("/")
-def root() -> dict:
+@app.get("/api/health", include_in_schema=False)
+def health_check() -> dict:
     return {
         "message": "API do Controle de Financas online.",
         "docs": "/docs",
     }
+
+
+frontend_dist = Path(__file__).resolve().parents[1] / "frontend" / "dist"
+if frontend_dist.is_dir():
+    app.frontend("/", directory=frontend_dist, fallback="index.html")

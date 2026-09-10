@@ -1,0 +1,9 @@
+[tool.vercel]
+entrypoint = "backend.main:app"
+
+[tool.vercel.scripts]
+build = "npm ci --prefix frontend && npm run build --prefix frontend"
+
+[tool.vercel.fastapi.static]
+cdn = true
+exclude = true

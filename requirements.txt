@@ -1,5 +1,5 @@
 bcrypt
-fastapi
+fastapi>=0.141.1,<1.0
 uvicorn
 email-validator
 httpx

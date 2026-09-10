@@ -60,6 +60,12 @@ Para configurar outra URL, crie `frontend/.env`:
 VITE_API_URL=http://127.0.0.1:8000
 ```
 
+## Publicar uma versão de demonstração na Vercel
+
+O repositório possui configuração para a Vercel localizar o FastAPI, compilar o frontend Vite e servir ambos pelo mesmo domínio. Ao conectar a branch `main`, mantenha o diretório raiz do projeto como Root Directory e deixe a detecção automática cuidar do build.
+
+Na Vercel, o SQLite usa armazenamento temporário e pode ser reiniciado entre execuções. Essa configuração serve apenas para demonstração. Antes de usar o produto com dados reais em produção, o banco deverá ser migrado para PostgreSQL ou outro armazenamento persistente.
+
 ## Verificações
 
 ```bash

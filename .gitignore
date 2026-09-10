@@ -3,6 +3,7 @@ __pycache__/
 .venv/
 node_modules/
 dist/
+storage/*.db
 .pytest_cache/
 .mypy_cache/
 .DS_Store
