@@ -15,7 +15,7 @@ import type {
 const API_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? "http://127.0.0.1:8000" : "");
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${API_URL}/api${path}`, {
     headers: {
       "Content-Type": "application/json",
       ...(options?.headers ?? {}),
@@ -77,10 +77,23 @@ export const api = {
     comentario: string;
     data: string;
     conta_id: number | null;
-  }) => request("/transactions", { method: "POST", body: JSON.stringify(payload) }),
+  }) => request<Transaction>("/transactions", { method: "POST", body: JSON.stringify(payload) }),
 
-  getAccounts: (usuarioId: number) =>
-    request<Account[]>(`/accounts?usuario_id=${usuarioId}`),
+  updateTransaction: (transactionId: number, payload: {
+    usuario_id: number;
+    valor: number;
+    tipo: "entrada" | "saida";
+    categoria_id: number | null;
+    comentario: string;
+    data: string;
+    conta_id: number | null;
+  }) => request<Transaction>(`/transactions/${transactionId}`, { method: "PUT", body: JSON.stringify(payload) }),
+
+  deleteTransaction: (transactionId: number, usuarioId: number) =>
+    request<void>(`/transactions/${transactionId}?usuario_id=${usuarioId}`, { method: "DELETE" }),
+
+  getAccounts: (usuarioId: number, includeInactive = false) =>
+    request<Account[]>(`/accounts?usuario_id=${usuarioId}&incluir_inativas=${includeInactive}`),
 
   createAccount: (payload: {
     usuario_id: number;
@@ -88,6 +101,19 @@ export const api = {
     tipo: AccountType;
     saldo_inicial: number;
   }) => request<Account>("/accounts", { method: "POST", body: JSON.stringify(payload) }),
+
+  updateAccount: (accountId: number, payload: {
+    usuario_id: number;
+    nome: string;
+    tipo: AccountType;
+    saldo_inicial: number;
+  }) => request<Account>(`/accounts/${accountId}`, { method: "PUT", body: JSON.stringify(payload) }),
+
+  updateAccountStatus: (accountId: number, usuarioId: number, ativo: boolean) =>
+    request<Account>(`/accounts/${accountId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ usuario_id: usuarioId, ativo }),
+    }),
 
   getTransfers: (usuarioId: number) =>
     request<Transfer[]>(`/transfers?usuario_id=${usuarioId}`),
@@ -99,7 +125,19 @@ export const api = {
     valor: number;
     descricao: string;
     data: string;
-  }) => request("/transfers", { method: "POST", body: JSON.stringify(payload) }),
+  }) => request<Transfer>("/transfers", { method: "POST", body: JSON.stringify(payload) }),
+
+  updateTransfer: (transferId: number, payload: {
+    usuario_id: number;
+    conta_origem_id: number;
+    conta_destino_id: number;
+    valor: number;
+    descricao: string;
+    data: string;
+  }) => request<Transfer>(`/transfers/${transferId}`, { method: "PUT", body: JSON.stringify(payload) }),
+
+  deleteTransfer: (transferId: number, usuarioId: number) =>
+    request<void>(`/transfers/${transferId}?usuario_id=${usuarioId}`, { method: "DELETE" }),
 
   getProfit: (usuarioId: number, dataInicio: string, dataFim: string) =>
     request<ProfitSummary>(`/dashboard/profit?usuario_id=${usuarioId}&data_inicio=${dataInicio}&data_fim=${dataFim}`),

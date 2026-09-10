@@ -1,46 +1,104 @@
 from database.connection import get_connection
 
+
 def criar_categoria(nome: str, usuario_id: int) -> int:
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO categorias (nome, usuario_id)
-        VALUES (?, ?)
-    """, (nome.strip(), usuario_id))
-    categoria_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
-    return categoria_id
+    try:
+        cursor = conn.execute(
+            "INSERT INTO categorias (nome, usuario_id) VALUES (?, ?)",
+            (nome, usuario_id),
+        )
+        conn.commit()
+        return int(cursor.lastrowid)
+    finally:
+        conn.close()
+
 
 def listar_categorias(usuario_id: int) -> list[tuple]:
-    """Retorna lista de (id, nome)."""
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT id, nome FROM categorias
-        WHERE usuario_id = ?
-        ORDER BY nome
-    """, (usuario_id,))
-    resultado = cursor.fetchall()
-    conn.close()
-    return resultado
+    try:
+        return conn.execute(
+            """
+            SELECT id, nome FROM categorias
+            WHERE usuario_id = ?
+            ORDER BY nome COLLATE NOCASE
+            """,
+            (usuario_id,),
+        ).fetchall()
+    finally:
+        conn.close()
 
-def deletar_categoria(categoria_id: int, usuario_id: int):
-    conn = get_connection()
-    cursor = conn.execute("""
-        DELETE FROM categorias
-        WHERE id = ? AND usuario_id = ?
-    """, (categoria_id, usuario_id))
-    conn.commit()
-    conn.close()
-    return cursor.rowcount > 0
 
-def renomear_categoria(categoria_id: int, novo_nome: str, usuario_id: int):
+def buscar_categoria_por_id(categoria_id: int, usuario_id: int) -> tuple | None:
     conn = get_connection()
-    cursor = conn.execute("""
-        UPDATE categorias SET nome = ?
-        WHERE id = ? AND usuario_id = ?
-    """, (novo_nome.strip(), categoria_id, usuario_id))
-    conn.commit()
-    conn.close()
-    return cursor.rowcount > 0
+    try:
+        return conn.execute(
+            "SELECT id, nome FROM categorias WHERE id = ? AND usuario_id = ?",
+            (categoria_id, usuario_id),
+        ).fetchone()
+    finally:
+        conn.close()
+
+
+def nome_categoria_existe(nome: str, usuario_id: int, ignorar_id: int | None = None) -> bool:
+    conn = get_connection()
+    try:
+        parametros: list[object] = [nome, usuario_id]
+        filtro_id = ""
+        if ignorar_id is not None:
+            filtro_id = "AND id <> ?"
+            parametros.append(ignorar_id)
+        return conn.execute(
+            f"""
+            SELECT 1 FROM categorias
+            WHERE nome = ? COLLATE NOCASE AND usuario_id = ? {filtro_id}
+            LIMIT 1
+            """,
+            parametros,
+        ).fetchone() is not None
+    finally:
+        conn.close()
+
+
+def categoria_em_uso(categoria_id: int, usuario_id: int) -> bool:
+    conn = get_connection()
+    try:
+        return conn.execute(
+            """
+            SELECT 1 FROM transacoes
+            WHERE categoria_id = ? AND usuario_id = ?
+            LIMIT 1
+            """,
+            (categoria_id, usuario_id),
+        ).fetchone() is not None
+    finally:
+        conn.close()
+
+
+def deletar_categoria(categoria_id: int, usuario_id: int) -> bool:
+    conn = get_connection()
+    try:
+        cursor = conn.execute(
+            "DELETE FROM categorias WHERE id = ? AND usuario_id = ?",
+            (categoria_id, usuario_id),
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+
+def renomear_categoria(categoria_id: int, novo_nome: str, usuario_id: int) -> bool:
+    conn = get_connection()
+    try:
+        cursor = conn.execute(
+            """
+            UPDATE categorias SET nome = ?
+            WHERE id = ? AND usuario_id = ?
+            """,
+            (novo_nome, categoria_id, usuario_id),
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()

@@ -27,12 +27,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router)
-app.include_router(accounts_router)
-app.include_router(categories_router)
-app.include_router(transactions_router)
-app.include_router(dashboard_router)
-app.include_router(sales_router)
+app.include_router(auth_router, prefix="/api")
+app.include_router(accounts_router, prefix="/api")
+app.include_router(categories_router, prefix="/api")
+app.include_router(transactions_router, prefix="/api")
+app.include_router(dashboard_router, prefix="/api")
+app.include_router(sales_router, prefix="/api")
 
 
 @app.get("/api/health", include_in_schema=False)

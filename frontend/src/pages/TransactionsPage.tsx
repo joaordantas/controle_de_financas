@@ -1,79 +1,160 @@
-import { ArrowDownLeft, ArrowUpRight, ReceiptText, Search } from "lucide-react";
+import { ArrowDownLeft, ArrowRightLeft, ArrowUpRight, FilterX, Pencil, ReceiptText, Search, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { api } from "../services/api";
 import { useAuth } from "../app/providers";
-import { Button } from "../components/ui/Button";
+import { MovementForm } from "../components/finance/MovementForm";
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { Feedback } from "../components/ui/Feedback";
+import { Modal } from "../components/ui/Modal";
 import { PageHeader } from "../components/ui/PageHeader";
-import type { Account, Category, Transaction, TransactionSummary } from "../types";
+import { api } from "../services/api";
+import type { Account, Category, MovementFormValues, MovementType, Transaction, Transfer } from "../types";
 import { formatCurrency, formatDate } from "../utils/formatters";
+
+type Movement =
+  | { kind: "transaction"; id: number; tipo: "entrada" | "saida"; valor: number; descricao: string; data: string; categoriaId: number | null; categoria: string; contaId: number | null; conta: string }
+  | { kind: "transfer"; id: number; tipo: "transferencia"; valor: number; descricao: string; data: string; contaOrigemId: number; contaOrigem: string; contaDestinoId: number; contaDestino: string };
+
+type TypeFilter = "todos" | MovementType;
+
+function initialForm(accounts: Account[]): MovementFormValues {
+  return {
+    tipo: "saida",
+    valor: 0,
+    descricao: "",
+    data: new Date().toISOString().slice(0, 10),
+    categoriaId: null,
+    contaId: accounts[0]?.id ?? null,
+    contaOrigemId: accounts[0]?.id ?? 0,
+    contaDestinoId: accounts[1]?.id ?? 0,
+  };
+}
+
+function movementFormValues(movement: Movement): MovementFormValues {
+  if (movement.kind === "transfer") {
+    return {
+      tipo: "transferencia",
+      valor: movement.valor,
+      descricao: movement.descricao,
+      data: movement.data,
+      categoriaId: null,
+      contaId: null,
+      contaOrigemId: movement.contaOrigemId,
+      contaDestinoId: movement.contaDestinoId,
+    };
+  }
+  return {
+    tipo: movement.tipo,
+    valor: movement.valor,
+    descricao: movement.descricao,
+    data: movement.data,
+    categoriaId: movement.categoriaId,
+    contaId: movement.contaId,
+    contaOrigemId: 0,
+    contaDestinoId: 0,
+  };
+}
 
 export function TransactionsPage() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const formRef = useRef<HTMLElement>(null);
-  const today = new Date().toISOString().slice(0, 10);
-  const [summary, setSummary] = useState<TransactionSummary>({ entradas: 0, saidas: 0, saldo: 0 });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transfers, setTransfers] = useState<Transfer[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [valor, setValor] = useState(0);
-  const [tipo, setTipo] = useState<"entrada" | "saida">("saida");
-  const [categoriaId, setCategoriaId] = useState<number | null>(null);
-  const [accountId, setAccountId] = useState<number | null>(null);
-  const [comentario, setComentario] = useState("");
-  const [data, setData] = useState(today);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [formVersion, setFormVersion] = useState(0);
+  const [editing, setEditing] = useState<Movement | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState<"todos" | "entrada" | "saida">("todos");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("todos");
+  const [accountFilter, setAccountFilter] = useState(0);
+  const [categoryFilter, setCategoryFilter] = useState(0);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-  const filteredTransactions = useMemo(() => {
+  const movements = useMemo<Movement[]>(() => [
+    ...transactions.map((transaction): Movement => ({
+      kind: "transaction",
+      id: transaction.id,
+      tipo: transaction.tipo,
+      valor: transaction.valor,
+      descricao: transaction.comentario ?? "",
+      data: transaction.data,
+      categoriaId: transaction.categoria_id,
+      categoria: transaction.categoria,
+      contaId: transaction.conta_id,
+      conta: transaction.conta,
+    })),
+    ...transfers.map((transfer): Movement => ({
+      kind: "transfer",
+      id: transfer.id,
+      tipo: "transferencia",
+      valor: transfer.valor,
+      descricao: transfer.descricao ?? "",
+      data: transfer.data,
+      contaOrigemId: transfer.conta_origem_id,
+      contaOrigem: transfer.conta_origem,
+      contaDestinoId: transfer.conta_destino_id,
+      contaDestino: transfer.conta_destino,
+    })),
+  ].sort((a, b) => b.data.localeCompare(a.data) || b.id - a.id), [transactions, transfers]);
+
+  const filteredMovements = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase("pt-BR");
-    return transactions.filter((transaction) => {
-      const matchesType = typeFilter === "todos" || transaction.tipo === typeFilter;
-      const matchesSearch = !normalizedSearch || [
-        transaction.comentario,
-        transaction.categoria,
-        transaction.conta,
-      ].some((value) => value?.toLocaleLowerCase("pt-BR").includes(normalizedSearch));
-      return matchesType && matchesSearch;
+    return movements.filter((movement) => {
+      const searchableValues = movement.kind === "transfer"
+        ? [movement.descricao, movement.contaOrigem, movement.contaDestino]
+        : [movement.descricao, movement.categoria, movement.conta];
+      const matchesSearch = !normalizedSearch || searchableValues.some((value) => value.toLocaleLowerCase("pt-BR").includes(normalizedSearch));
+      const matchesType = typeFilter === "todos" || movement.tipo === typeFilter;
+      const matchesAccount = accountFilter === 0 || (movement.kind === "transfer"
+        ? movement.contaOrigemId === accountFilter || movement.contaDestinoId === accountFilter
+        : movement.contaId === accountFilter);
+      const matchesCategory = categoryFilter === 0 || (movement.kind === "transaction" && movement.categoriaId === categoryFilter);
+      const matchesStart = !startDate || movement.data >= startDate;
+      const matchesEnd = !endDate || movement.data <= endDate;
+      return matchesSearch && matchesType && matchesAccount && matchesCategory && matchesStart && matchesEnd;
     });
-  }, [search, transactions, typeFilter]);
+  }, [accountFilter, categoryFilter, endDate, movements, search, startDate, typeFilter]);
+
+  const summary = useMemo(() => filteredMovements.reduce((result, movement) => {
+    if (movement.tipo === "entrada") result.entradas += movement.valor;
+    if (movement.tipo === "saida") result.saidas += movement.valor;
+    result.saldo = result.entradas - result.saidas;
+    return result;
+  }, { entradas: 0, saidas: 0, saldo: 0 }), [filteredMovements]);
+
+  const hasFilters = Boolean(search || typeFilter !== "todos" || accountFilter || categoryFilter || startDate || endDate);
 
   async function load() {
     if (!user) return;
     try {
       setLoading(true);
-      const [summaryData, transactionData, categoryData, accountData] = await Promise.all([
-        api.getTransactionSummary(user.id),
+      const [transactionData, transferData, categoryData, accountData] = await Promise.all([
         api.getTransactions(user.id),
+        api.getTransfers(user.id),
         api.getCategories(user.id),
         api.getAccounts(user.id),
       ]);
-      setSummary(summaryData);
       setTransactions(transactionData);
+      setTransfers(transferData);
       setCategories(categoryData);
       setAccounts(accountData);
-      setAccountId((current) => current ?? accountData[0]?.id ?? null);
       setError("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível carregar suas transações.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar suas movimentações.");
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => {
-    void load();
-  }, [user?.id]);
+  useEffect(() => { void load(); }, [user?.id]);
 
   useEffect(() => {
     if (searchParams.get("new") === "1") {
@@ -81,133 +162,125 @@ export function TransactionsPage() {
     }
   }, [searchParams]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!user) return;
+  async function createCategory(name: string) {
+    if (!user) throw new Error("Sessão inválida.");
+    const category = await api.createCategory(user.id, name);
+    setCategories((current) => [...current, category].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")));
+    return category;
+  }
 
+  async function createMovement(values: MovementFormValues) {
+    if (!user) return;
     try {
       setSaving(true);
-      await api.createTransaction({
-        usuario_id: user.id,
-        valor,
-        tipo,
-        categoria_id: tipo === "saida" ? categoriaId : null,
-        comentario,
-        data,
-        conta_id: accountId,
-      });
-      setValor(0);
-      setComentario("");
-      setCategoriaId(null);
-      setMessage("Transação adicionada com sucesso.");
+      if (values.tipo === "transferencia") {
+        await api.createTransfer({ usuario_id: user.id, conta_origem_id: values.contaOrigemId, conta_destino_id: values.contaDestinoId, valor: values.valor, descricao: values.descricao, data: values.data });
+      } else {
+        await api.createTransaction({ usuario_id: user.id, valor: values.valor, tipo: values.tipo, categoria_id: values.categoriaId, comentario: values.descricao, data: values.data, conta_id: values.contaId });
+      }
+      setFormVersion((current) => current + 1);
+      setMessage(values.tipo === "transferencia" ? "Transferência registrada sem alterar receitas e despesas." : "Movimentação adicionada com sucesso.");
       setError("");
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Não foi possível salvar a transação.");
+      setError(err instanceof Error ? err.message : "Não foi possível salvar a movimentação.");
       setMessage("");
     } finally {
       setSaving(false);
     }
   }
 
+  async function updateMovement(values: MovementFormValues) {
+    if (!user || !editing) return;
+    try {
+      setSaving(true);
+      if (editing.kind === "transfer") {
+        await api.updateTransfer(editing.id, { usuario_id: user.id, conta_origem_id: values.contaOrigemId, conta_destino_id: values.contaDestinoId, valor: values.valor, descricao: values.descricao, data: values.data });
+      } else if (values.tipo !== "transferencia") {
+        await api.updateTransaction(editing.id, { usuario_id: user.id, valor: values.valor, tipo: values.tipo, categoria_id: values.categoriaId, comentario: values.descricao, data: values.data, conta_id: values.contaId });
+      }
+      setEditing(null);
+      setMessage("Movimentação atualizada com sucesso.");
+      setError("");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível atualizar a movimentação.");
+      setMessage("");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function deleteMovement(movement: Movement) {
+    if (!user || !window.confirm(`Excluir \"${movement.descricao || "movimentação"}\"?`)) return;
+    try {
+      if (movement.kind === "transfer") await api.deleteTransfer(movement.id, user.id);
+      else await api.deleteTransaction(movement.id, user.id);
+      setMessage("Movimentação excluída e saldos recalculados.");
+      setError("");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível excluir a movimentação.");
+      setMessage("");
+    }
+  }
+
+  function clearFilters() {
+    setSearch("");
+    setTypeFilter("todos");
+    setAccountFilter(0);
+    setCategoryFilter(0);
+    setStartDate("");
+    setEndDate("");
+  }
+
   return (
     <div className="page-stack">
-      <PageHeader description="Registre e acompanhe todas as suas movimentações." eyebrow="Organização financeira" title="Transações" />
-
+      <PageHeader description="Registre, encontre e corrija todas as suas movimentações." eyebrow="Organização financeira" title="Transações" />
       {error ? <Feedback>{error}</Feedback> : null}
       {message ? <Feedback tone="success">{message}</Feedback> : null}
 
-      <section className="summary-grid compact-summary" aria-label="Resumo financeiro">
-        <Card className="summary-card"><span>Saldo</span><strong>{formatCurrency(summary.saldo)}</strong></Card>
+      <section className="summary-grid compact-summary" aria-label="Resumo dos resultados exibidos">
+        <Card className="summary-card"><span>Resultado exibido</span><strong>{formatCurrency(summary.saldo)}</strong></Card>
         <Card className="summary-card"><span>Entradas</span><strong className="amount-income">{formatCurrency(summary.entradas)}</strong></Card>
         <Card className="summary-card"><span>Gastos</span><strong>{formatCurrency(summary.saidas)}</strong></Card>
       </section>
 
       <div className="transactions-layout">
         <section id="new-transaction" ref={formRef}>
-        <Card className="transaction-form-card">
-          <div className="card-heading">
-            <span className="section-kicker">Registro rápido</span>
-            <h2>Nova transação</h2>
-          </div>
-
-          <form className="form-grid" onSubmit={handleSubmit}>
-            <div className="segmented-control" aria-label="Tipo de transação">
-              <button className={tipo === "saida" ? "is-active" : ""} onClick={() => setTipo("saida")} type="button"><ArrowUpRight size={17} />Despesa</button>
-              <button className={tipo === "entrada" ? "is-active" : ""} onClick={() => setTipo("entrada")} type="button"><ArrowDownLeft size={17} />Receita</button>
-            </div>
-
-            <label className="amount-field">
-              <span>Valor</span>
-              <div><span>R$</span><input min="0.01" onChange={(event) => setValor(Number(event.target.value))} step="0.01" type="number" value={valor || ""} /></div>
-            </label>
-
-            <label>
-              Descrição
-              <input onChange={(event) => setComentario(event.target.value)} placeholder="Ex.: Mercado, salário, academia" value={comentario} />
-            </label>
-
-            {tipo === "saida" ? (
-              <label>
-                Categoria
-                <select onChange={(event) => setCategoriaId(event.target.value ? Number(event.target.value) : null)} value={categoriaId ?? ""}>
-                  <option value="">Selecione uma categoria</option>
-                  {categories.map((category) => <option key={category.id} value={category.id}>{category.nome}</option>)}
-                </select>
-              </label>
-            ) : null}
-
-            <label>
-              Conta
-              <select onChange={(event) => setAccountId(event.target.value ? Number(event.target.value) : null)} value={accountId ?? ""}>
-                <option value="">Sem conta</option>
-                {accounts.map((account) => <option key={account.id} value={account.id}>{account.nome}</option>)}
-              </select>
-            </label>
-
-            <label>
-              Data
-              <input onChange={(event) => setData(event.target.value)} type="date" value={data} />
-            </label>
-
-            <Button disabled={saving || valor <= 0} type="submit">{saving ? "Adicionando..." : "Adicionar transação"}</Button>
-          </form>
-        </Card>
+          <Card className="transaction-form-card">
+            <div className="card-heading"><span className="section-kicker">Registro rápido</span><h2>Nova movimentação</h2></div>
+            <MovementForm accounts={accounts} categories={categories} initialValues={initialForm(accounts)} key={`create-${formVersion}-${accounts.map((account) => account.id).join("-")}`} mode="create" onCreateCategory={createCategory} onSubmit={createMovement} saving={saving} />
+          </Card>
         </section>
 
         <Card as="section" className="transactions-history">
-          <div className="card-heading card-heading-row">
-            <div><span className="section-kicker">Histórico</span><h2>Suas movimentações</h2></div>
-            <span className="count-badge">{filteredTransactions.length}</span>
+          <div className="card-heading card-heading-row"><div><span className="section-kicker">Histórico unificado</span><h2>Suas movimentações</h2></div><span className="count-badge">{filteredMovements.length}</span></div>
+          <div className="transaction-filters transaction-filters-full">
+            <label className="search-field"><Search aria-hidden="true" size={17} /><input aria-label="Buscar movimentações" onChange={(event) => setSearch(event.target.value)} placeholder="Buscar descrição, categoria ou conta" value={search} /></label>
+            <select aria-label="Filtrar por tipo" onChange={(event) => setTypeFilter(event.target.value as TypeFilter)} value={typeFilter}><option value="todos">Todos os tipos</option><option value="saida">Despesas</option><option value="entrada">Receitas</option><option value="transferencia">Transferências</option></select>
+            <select aria-label="Filtrar por conta" onChange={(event) => setAccountFilter(Number(event.target.value))} value={accountFilter}><option value={0}>Todas as contas</option>{accounts.map((account) => <option key={account.id} value={account.id}>{account.nome}</option>)}</select>
+            <select aria-label="Filtrar por categoria" onChange={(event) => setCategoryFilter(Number(event.target.value))} value={categoryFilter}><option value={0}>Todas as categorias</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.nome}</option>)}</select>
+            <label className="filter-date"><span>De</span><input aria-label="Data inicial" onChange={(event) => setStartDate(event.target.value)} type="date" value={startDate} /></label>
+            <label className="filter-date"><span>Até</span><input aria-label="Data final" min={startDate || undefined} onChange={(event) => setEndDate(event.target.value)} type="date" value={endDate} /></label>
           </div>
-
-          <div className="transaction-filters">
-            <label className="search-field"><Search aria-hidden="true" size={17} /><input aria-label="Buscar transações" onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por descrição, categoria ou conta" value={search} /></label>
-            <select aria-label="Filtrar por tipo" onChange={(event) => setTypeFilter(event.target.value as typeof typeFilter)} value={typeFilter}>
-              <option value="todos">Todos os tipos</option>
-              <option value="saida">Despesas</option>
-              <option value="entrada">Receitas</option>
-            </select>
-          </div>
+          {hasFilters ? <button className="text-button clear-filters" onClick={clearFilters} type="button"><FilterX size={15} />Limpar filtros</button> : null}
 
           {loading ? (
             <div className="transaction-list">{[1, 2, 3, 4].map((item) => <span className="skeleton skeleton-row" key={item} />)}</div>
-          ) : filteredTransactions.length === 0 ? (
-            <EmptyState description={transactions.length === 0 ? "Sua primeira movimentação aparecerá aqui assim que for adicionada." : "Tente ajustar a busca ou o tipo selecionado."} icon={ReceiptText} title={transactions.length === 0 ? "Nenhuma transação registrada" : "Nenhum resultado encontrado"} />
+          ) : filteredMovements.length === 0 ? (
+            <EmptyState description={movements.length === 0 ? "Sua primeira movimentação aparecerá aqui assim que for adicionada." : "Ajuste ou limpe os filtros para ver outros resultados."} icon={ReceiptText} title={movements.length === 0 ? "Nenhuma movimentação registrada" : "Nenhum resultado encontrado"} />
           ) : (
             <div className="transaction-list">
-              {filteredTransactions.map((transaction) => {
-                const isIncome = transaction.tipo === "entrada";
+              {filteredMovements.map((movement) => {
+                const isIncome = movement.tipo === "entrada";
+                const isTransfer = movement.kind === "transfer";
                 return (
-                  <div className="transaction-row" key={transaction.id}>
-                    <span className={`transaction-icon ${isIncome ? "income" : "expense"}`}>
-                      {isIncome ? <ArrowDownLeft size={18} /> : <ArrowUpRight size={18} />}
-                    </span>
-                    <span className="transaction-info">
-                      <strong>{transaction.comentario || (isIncome ? "Receita" : "Despesa")}</strong>
-                      <small>{transaction.categoria || "Sem categoria"} · {transaction.conta} · {formatDate(transaction.data)}</small>
-                    </span>
-                    <strong className={isIncome ? "amount-income" : "amount-expense"}>{isIncome ? "+" : "−"} {formatCurrency(transaction.valor)}</strong>
+                  <div className="transaction-row transaction-row-actions" key={`${movement.kind}-${movement.id}`}>
+                    <span className={`transaction-icon ${isTransfer ? "transfer" : isIncome ? "income" : "expense"}`}>{isTransfer ? <ArrowRightLeft size={18} /> : isIncome ? <ArrowDownLeft size={18} /> : <ArrowUpRight size={18} />}</span>
+                    <span className="transaction-info"><strong>{movement.descricao || (isTransfer ? "Transferência" : isIncome ? "Receita" : "Despesa")}</strong><small>{isTransfer ? `${movement.contaOrigem} → ${movement.contaDestino}` : `${movement.categoria || "Sem categoria"} · ${movement.conta}`} · {formatDate(movement.data)}</small></span>
+                    <strong className={isIncome ? "amount-income" : isTransfer ? "" : "amount-expense"}>{isIncome ? "+" : isTransfer ? "" : "−"} {formatCurrency(movement.valor)}</strong>
+                    <span className="movement-actions"><button aria-label={`Editar ${movement.descricao || "movimentação"}`} className="icon-button" onClick={() => setEditing(movement)} type="button"><Pencil size={15} /></button><button aria-label={`Excluir ${movement.descricao || "movimentação"}`} className="icon-button danger-icon-button" onClick={() => void deleteMovement(movement)} type="button"><Trash2 size={15} /></button></span>
                   </div>
                 );
               })}
@@ -216,6 +289,7 @@ export function TransactionsPage() {
         </Card>
       </div>
 
+      {editing ? <Modal onClose={() => setEditing(null)} title="Editar movimentação"><MovementForm accounts={accounts} categories={categories} initialValues={movementFormValues(editing)} key={`${editing.kind}-${editing.id}`} mode="edit" onCreateCategory={createCategory} onSubmit={updateMovement} saving={saving} /></Modal> : null}
     </div>
   );
 }

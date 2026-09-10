@@ -4,20 +4,25 @@ Assistente financeiro pessoal construído com FastAPI, React, TypeScript e SQLit
 
 ## Fase atual
 
-**Fase 2 — Núcleo Financeiro em andamento.**
+**Fase 2 — Núcleo Financeiro concluída.**
 
 A Fase 1 estabeleceu a nova fundação do frontend, com rotas reais, layout responsivo, navegação para desktop e celular e componentes visuais reutilizáveis.
 
-O primeiro bloco da Fase 2 adiciona:
+A Fase 2 entrega:
 
 - contas financeiras e saldo por conta;
 - receitas e despesas vinculadas a contas;
 - transferências que não alteram receitas ou despesas;
-- busca e filtro básico de transações;
+- histórico unificado de receitas, despesas e transferências;
+- busca e filtros por tipo, conta, categoria e período;
+- edição e exclusão de movimentações com recálculo de saldos;
+- edição, ativação e desativação segura de contas;
+- criação de categorias dentro do registro de movimentações;
+- proteção contra categorias duplicadas ou em uso;
 - Dashboard conectado ao saldo das contas;
 - tema claro e escuro com identidade visual em índigo.
 
-Ainda fazem parte da Fase 2: edição e desativação de contas, edição e exclusão de transações, filtros por período e melhorias na gestão de categorias.
+O próximo passo planejado é a **Fase 3 — Planejamento Financeiro**, com cartões, faturas, parcelamentos, recorrências, orçamentos e metas. Ela ainda não foi iniciada.
 
 ## Estrutura principal
 
@@ -52,7 +57,7 @@ npm install
 npm run dev
 ```
 
-O frontend fica disponível em `http://localhost:5173` e usa `http://127.0.0.1:8000` como API por padrão.
+O frontend fica disponível em `http://localhost:5173` e usa `http://127.0.0.1:8000/api` como API por padrão. A variável abaixo deve informar somente a origem, pois o prefixo `/api` é acrescentado pela aplicação.
 
 Para configurar outra URL, crie `frontend/.env`:
 

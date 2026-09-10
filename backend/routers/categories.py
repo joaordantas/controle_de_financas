@@ -39,6 +39,9 @@ def update_category(categoria_id: int, payload: CategoryUpdate) -> CategoryRespo
 
 @router.delete("/{categoria_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_category(categoria_id: int, usuario_id: int = Query(..., ge=1)) -> None:
-    removido = deletar_categoria_service(categoria_id, usuario_id)
+    try:
+        removido = deletar_categoria_service(categoria_id, usuario_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     if not removido:
         raise HTTPException(status_code=404, detail="Categoria nao encontrada.")

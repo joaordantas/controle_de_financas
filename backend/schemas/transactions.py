@@ -13,10 +13,15 @@ class TransactionCreate(BaseModel):
     conta_id: int | None = Field(default=None, ge=1)
 
 
+class TransactionUpdate(TransactionCreate):
+    pass
+
+
 class TransactionListItem(BaseModel):
     id: int
     valor: float
     tipo: str
+    categoria_id: int | None = None
     categoria: str
     comentario: str | None = None
     data: str

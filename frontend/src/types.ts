@@ -13,7 +13,8 @@ export interface Category {
 export interface Transaction {
   id: number;
   valor: number;
-  tipo: string;
+  tipo: "entrada" | "saida";
+  categoria_id: number | null;
   categoria: string;
   comentario: string | null;
   data: string;
@@ -41,6 +42,19 @@ export interface Transfer {
   valor: number;
   descricao: string | null;
   data: string;
+}
+
+export type MovementType = "entrada" | "saida" | "transferencia";
+
+export interface MovementFormValues {
+  tipo: MovementType;
+  valor: number;
+  descricao: string;
+  data: string;
+  categoriaId: number | null;
+  contaId: number | null;
+  contaOrigemId: number;
+  contaDestinoId: number;
 }
 
 export interface TransactionSummary {

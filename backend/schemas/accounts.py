@@ -13,6 +13,15 @@ class AccountCreate(BaseModel):
     usuario_id: int = Field(ge=1)
 
 
+class AccountUpdate(AccountCreate):
+    pass
+
+
+class AccountStatusUpdate(BaseModel):
+    ativo: bool
+    usuario_id: int = Field(ge=1)
+
+
 class AccountResponse(BaseModel):
     id: int
     nome: str
@@ -29,6 +38,10 @@ class TransferCreate(BaseModel):
     descricao: str | None = Field(default=None, max_length=255)
     data: str
     usuario_id: int = Field(ge=1)
+
+
+class TransferUpdate(TransferCreate):
+    pass
 
 
 class TransferResponse(BaseModel):
