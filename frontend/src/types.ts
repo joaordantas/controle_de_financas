@@ -1,5 +1,3 @@
-export type ViewKey = "dashboard" | "financeiro" | "categorias" | "servicos";
-
 export interface User {
   id: number;
   usuario: string;

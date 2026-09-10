@@ -1,12 +1,14 @@
 from database.connection import get_connection
 
 def adicionar_transacao(valor: float, tipo: str, categoria_id: int | None,
-                        comentario: str | None, data: str, usuario_id: int):
+                        comentario: str | None, data: str, usuario_id: int,
+                        conta_id: int | None = None):
     conn = get_connection()
     conn.execute("""
-        INSERT INTO transacoes (valor, tipo, categoria_id, comentario, data, usuario_id)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (valor, tipo, categoria_id, comentario, data, usuario_id))
+        INSERT INTO transacoes (
+            valor, tipo, categoria_id, comentario, data, usuario_id, conta_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (valor, tipo, categoria_id, comentario, data, usuario_id, conta_id))
     conn.commit()
     conn.close()
 
@@ -17,11 +19,14 @@ def listar_transacoes(usuario_id: int) -> list:
     cursor.execute("""
         SELECT t.id, t.valor, t.tipo,
                COALESCE(c.nome, '—') AS categoria,
-               t.comentario, t.data
+               t.comentario, t.data,
+               t.conta_id,
+               COALESCE(conta.nome, 'Sem conta') AS conta
         FROM transacoes t
         LEFT JOIN categorias c ON c.id = t.categoria_id
+        LEFT JOIN contas conta ON conta.id = t.conta_id
         WHERE t.usuario_id = ?
-        ORDER BY t.data DESC
+        ORDER BY t.data DESC, t.id DESC
     """, (usuario_id,))
     dados = cursor.fetchall()
     conn.close()

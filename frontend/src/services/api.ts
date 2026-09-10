@@ -7,7 +7,7 @@ import type {
   Transaction,
   TransactionSummary,
   User,
-} from "./types";
+} from "../types";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
 
@@ -24,39 +24,23 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     let detail = "Erro ao se comunicar com a API.";
     try {
       const body = await response.json();
-      if (body.detail) {
-        detail = body.detail;
-      }
+      if (body.detail) detail = body.detail;
     } catch {
       detail = response.statusText || detail;
     }
     throw new Error(detail);
   }
 
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
+  if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
 }
 
 export const api = {
   login: (email: string, senha: string) =>
-    request<User>("/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, senha }),
-    }),
+    request<User>("/auth/login", { method: "POST", body: JSON.stringify({ email, senha }) }),
 
-  register: (payload: {
-    usuario: string;
-    email: string;
-    senha: string;
-    tipo_perfil: string;
-  }) =>
-    request<User>("/auth/register", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
+  register: (payload: { usuario: string; email: string; senha: string; tipo_perfil: string }) =>
+    request<User>("/auth/register", { method: "POST", body: JSON.stringify(payload) }),
 
   getCategories: (usuarioId: number) =>
     request<Category[]>(`/categories?usuario_id=${usuarioId}`),
@@ -74,9 +58,7 @@ export const api = {
     }),
 
   deleteCategory: (categoriaId: number, usuarioId: number) =>
-    request<void>(`/categories/${categoriaId}?usuario_id=${usuarioId}`, {
-      method: "DELETE",
-    }),
+    request<void>(`/categories/${categoriaId}?usuario_id=${usuarioId}`, { method: "DELETE" }),
 
   getTransactions: (usuarioId: number) =>
     request<Transaction[]>(`/transactions?usuario_id=${usuarioId}`),
@@ -91,16 +73,10 @@ export const api = {
     categoria_id: number | null;
     comentario: string;
     data: string;
-  }) =>
-    request("/transactions", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
+  }) => request("/transactions", { method: "POST", body: JSON.stringify(payload) }),
 
   getProfit: (usuarioId: number, dataInicio: string, dataFim: string) =>
-    request<ProfitSummary>(
-      `/dashboard/profit?usuario_id=${usuarioId}&data_inicio=${dataInicio}&data_fim=${dataFim}`,
-    ),
+    request<ProfitSummary>(`/dashboard/profit?usuario_id=${usuarioId}&data_inicio=${dataInicio}&data_fim=${dataFim}`),
 
   getReceivablesTotal: (usuarioId: number) =>
     request<{ total: number }>(`/dashboard/receivables/total?usuario_id=${usuarioId}`),
@@ -108,8 +84,7 @@ export const api = {
   getReceivablesByClient: (usuarioId: number) =>
     request<ReceivableByClient[]>(`/dashboard/receivables/by-client?usuario_id=${usuarioId}`),
 
-  getSales: (usuarioId: number) =>
-    request<Sale[]>(`/sales?usuario_id=${usuarioId}`),
+  getSales: (usuarioId: number) => request<Sale[]>(`/sales?usuario_id=${usuarioId}`),
 
   createSale: (payload: {
     usuario_id: number;
@@ -118,19 +93,12 @@ export const api = {
     valor_total: number;
     comentario: string;
     data: string;
-  }) =>
-    request<Sale>("/sales", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
+  }) => request<Sale>("/sales", { method: "POST", body: JSON.stringify(payload) }),
 
-  getClients: (usuarioId: number) =>
-    request<string[]>(`/sales/clients?usuario_id=${usuarioId}`),
+  getClients: (usuarioId: number) => request<string[]>(`/sales/clients?usuario_id=${usuarioId}`),
 
   getInstallmentsByClient: (usuarioId: number, cliente: string) =>
-    request<ClientInstallmentsResponse>(
-      `/installments/by-client?usuario_id=${usuarioId}&cliente=${encodeURIComponent(cliente)}`,
-    ),
+    request<ClientInstallmentsResponse>(`/installments/by-client?usuario_id=${usuarioId}&cliente=${encodeURIComponent(cliente)}`),
 
   createInstallments: (payload: {
     usuario_id: number;
@@ -139,14 +107,8 @@ export const api = {
     valor: number;
     status: "pendente" | "pago";
     data: string;
-  }) =>
-    request("/installments", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
+  }) => request("/installments", { method: "POST", body: JSON.stringify(payload) }),
 
   payInstallment: (parcelaId: number, usuarioId: number) =>
-    request<{ message: string }>(`/installments/${parcelaId}/pay?usuario_id=${usuarioId}`, {
-      method: "POST",
-    }),
+    request<{ message: string }>(`/installments/${parcelaId}/pay?usuario_id=${usuarioId}`, { method: "POST" }),
 };

@@ -3,6 +3,7 @@ from repositories.transacao_repo import (
     calcular_resumo,
     listar_transacoes,
 )
+from services.conta_service import obter_conta_ativa
 
 
 def criar_transacao_service(
@@ -12,13 +13,16 @@ def criar_transacao_service(
     comentario: str | None,
     data: str,
     usuario_id: int,
+    conta_id: int | None = None,
 ) -> dict:
     if valor <= 0:
         raise ValueError("O valor da transacao deve ser maior que zero.")
     if tipo not in {"entrada", "saida"}:
         raise ValueError("Tipo de transacao invalido.")
+    if conta_id is not None and obter_conta_ativa(conta_id, usuario_id) is None:
+        raise ValueError("Conta nao encontrada.")
 
-    adicionar_transacao(valor, tipo, categoria_id, comentario, data, usuario_id)
+    adicionar_transacao(valor, tipo, categoria_id, comentario, data, usuario_id, conta_id)
     return {
         "valor": float(valor),
         "tipo": tipo,
@@ -26,6 +30,7 @@ def criar_transacao_service(
         "comentario": comentario,
         "data": data,
         "usuario_id": usuario_id,
+        "conta_id": conta_id,
     }
 
 
@@ -39,8 +44,10 @@ def listar_transacoes_formatadas(usuario_id: int) -> list[dict]:
             "categoria": categoria,
             "comentario": comentario,
             "data": data,
+            "conta_id": conta_id,
+            "conta": conta,
         }
-        for transacao_id, valor, tipo, categoria, comentario, data in transacoes
+        for transacao_id, valor, tipo, categoria, comentario, data, conta_id, conta in transacoes
     ]
 
 
