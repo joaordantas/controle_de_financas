@@ -1,7 +1,7 @@
-import { LogOut } from "lucide-react";
+import { LogOut, Moon, Sun } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
-import { useAuth } from "../../app/providers";
+import { useAuth, useTheme } from "../../app/providers";
 import { primaryNavigation, productIcon as ProductIcon, secondaryNavigation } from "./navigation";
 
 function NavigationLink({ item }: { item: (typeof primaryNavigation)[number] }) {
@@ -20,6 +20,7 @@ function NavigationLink({ item }: { item: (typeof primaryNavigation)[number] }) 
 
 export function Sidebar() {
   const { logout, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <aside className="desktop-sidebar">
@@ -41,6 +42,10 @@ export function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
+        <button className="theme-button" onClick={toggleTheme} type="button">
+          {theme === "dark" ? <Sun aria-hidden="true" size={18} /> : <Moon aria-hidden="true" size={18} />}
+          <span>{theme === "dark" ? "Tema claro" : "Tema escuro"}</span>
+        </button>
         <nav aria-label="Navegação secundária">
           {secondaryNavigation.map((item) => (
             <NavigationLink item={item} key={item.path} />

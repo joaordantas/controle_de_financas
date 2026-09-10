@@ -9,6 +9,7 @@ import { NotFoundPage } from "../pages/NotFoundPage";
 import { SettingsPage } from "../pages/SettingsPage";
 import { CategoriesPage } from "../pages/settings/CategoriesPage";
 import { TransactionsPage } from "../pages/TransactionsPage";
+import { AccountsPage } from "../pages/AccountsPage";
 import { useAuth } from "./providers";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -41,10 +42,7 @@ const router = createBrowserRouter([
       { index: true, element: <Navigate replace to="/dashboard" /> },
       { path: "dashboard", element: <DashboardPage /> },
       { path: "transactions", element: <TransactionsPage /> },
-      {
-        path: "accounts",
-        element: <ComingSoonPage description="As contas e seus saldos serão construídos no núcleo financeiro." title="Contas" />,
-      },
+      { path: "accounts", element: <AccountsPage /> },
       {
         path: "cards",
         element: <ComingSoonPage description="Cartões, faturas e parcelamentos fazem parte da etapa de planejamento." title="Cartões" />,

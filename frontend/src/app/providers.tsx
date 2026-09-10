@@ -4,6 +4,9 @@ import type { ReactNode } from "react";
 import type { User } from "../types";
 
 const STORAGE_KEY = "controle-financas-user";
+const THEME_STORAGE_KEY = "financas-theme";
+
+export type Theme = "light" | "dark";
 
 interface AuthContextValue {
   user: User | null;
@@ -13,6 +16,34 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+const ThemeContext = createContext<{
+  theme: Theme;
+  toggleTheme: () => void;
+} | null>(null);
+
+function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<Theme>(() => {
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === "light" || savedTheme === "dark") return savedTheme;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  const value = useMemo(
+    () => ({
+      theme,
+      toggleTheme: () => setTheme((current) => current === "light" ? "dark" : "light"),
+    }),
+    [theme],
+  );
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
 
 function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
@@ -53,7 +84,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function AppProviders({ children }: { children: ReactNode }) {
-  return <AuthProvider>{children}</AuthProvider>;
+  return <ThemeProvider><AuthProvider>{children}</AuthProvider></ThemeProvider>;
 }
 
 export function useAuth() {
@@ -61,6 +92,16 @@ export function useAuth() {
 
   if (!context) {
     throw new Error("useAuth precisa ser usado dentro de AppProviders.");
+  }
+
+  return context;
+}
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+
+  if (!context) {
+    throw new Error("useTheme precisa ser usado dentro de AppProviders.");
   }
 
   return context;

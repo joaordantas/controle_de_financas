@@ -17,6 +17,30 @@ export interface Transaction {
   categoria: string;
   comentario: string | null;
   data: string;
+  conta_id: number | null;
+  conta: string;
+}
+
+export type AccountType = "corrente" | "poupanca" | "digital" | "dinheiro" | "outro";
+
+export interface Account {
+  id: number;
+  nome: string;
+  tipo: AccountType;
+  saldo_inicial: number;
+  saldo_atual: number;
+  ativo: boolean;
+}
+
+export interface Transfer {
+  id: number;
+  conta_origem_id: number;
+  conta_origem: string;
+  conta_destino_id: number;
+  conta_destino: string;
+  valor: number;
+  descricao: string | null;
+  data: string;
 }
 
 export interface TransactionSummary {

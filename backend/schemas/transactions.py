@@ -10,6 +10,7 @@ class TransactionCreate(BaseModel):
     comentario: str | None = Field(default=None, max_length=255)
     data: str
     usuario_id: int = Field(ge=1)
+    conta_id: int | None = Field(default=None, ge=1)
 
 
 class TransactionListItem(BaseModel):
@@ -19,6 +20,8 @@ class TransactionListItem(BaseModel):
     categoria: str
     comentario: str | None = None
     data: str
+    conta_id: int | None = None
+    conta: str = "Sem conta"
 
 
 class TransactionSummary(BaseModel):

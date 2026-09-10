@@ -1,4 +1,6 @@
 import type {
+  Account,
+  AccountType,
   Category,
   ClientInstallmentsResponse,
   ProfitSummary,
@@ -6,6 +8,7 @@ import type {
   Sale,
   Transaction,
   TransactionSummary,
+  Transfer,
   User,
 } from "../types";
 
@@ -73,7 +76,30 @@ export const api = {
     categoria_id: number | null;
     comentario: string;
     data: string;
+    conta_id: number | null;
   }) => request("/transactions", { method: "POST", body: JSON.stringify(payload) }),
+
+  getAccounts: (usuarioId: number) =>
+    request<Account[]>(`/accounts?usuario_id=${usuarioId}`),
+
+  createAccount: (payload: {
+    usuario_id: number;
+    nome: string;
+    tipo: AccountType;
+    saldo_inicial: number;
+  }) => request<Account>("/accounts", { method: "POST", body: JSON.stringify(payload) }),
+
+  getTransfers: (usuarioId: number) =>
+    request<Transfer[]>(`/transfers?usuario_id=${usuarioId}`),
+
+  createTransfer: (payload: {
+    usuario_id: number;
+    conta_origem_id: number;
+    conta_destino_id: number;
+    valor: number;
+    descricao: string;
+    data: string;
+  }) => request("/transfers", { method: "POST", body: JSON.stringify(payload) }),
 
   getProfit: (usuarioId: number, dataInicio: string, dataFim: string) =>
     request<ProfitSummary>(`/dashboard/profit?usuario_id=${usuarioId}&data_inicio=${dataInicio}&data_fim=${dataFim}`),

@@ -8,7 +8,7 @@ import { EmptyState } from "../components/ui/EmptyState";
 import { Feedback } from "../components/ui/Feedback";
 import { PageHeader } from "../components/ui/PageHeader";
 import { api } from "../services/api";
-import type { ProfitSummary, Transaction } from "../types";
+import type { Account, ProfitSummary, Transaction } from "../types";
 import { formatCurrency, formatDate, getCurrentMonthRange } from "../utils/formatters";
 
 export function DashboardPage() {
@@ -16,6 +16,7 @@ export function DashboardPage() {
   const period = useMemo(getCurrentMonthRange, []);
   const [profit, setProfit] = useState<ProfitSummary>({ entrada: 0, saida: 0, lucro: 0 });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -26,12 +27,14 @@ export function DashboardPage() {
     async function loadDashboard() {
       try {
         setLoading(true);
-        const [profitData, transactionData] = await Promise.all([
+        const [profitData, transactionData, accountData] = await Promise.all([
           api.getProfit(userId, period.start, period.end),
           api.getTransactions(userId),
+          api.getAccounts(userId),
         ]);
         setProfit(profitData);
         setTransactions(transactionData.slice(0, 5));
+        setAccounts(accountData);
         setError("");
       } catch (err) {
         setError(err instanceof Error ? err.message : "Não foi possível carregar seu resumo financeiro.");
@@ -46,6 +49,7 @@ export function DashboardPage() {
   const firstName = user?.usuario.split(" ")[0] ?? "";
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+  const totalBalance = accounts.reduce((total, account) => total + account.saldo_atual, 0);
   const attentionTitle = transactions.length === 0
     ? "Tudo pronto para começar"
     : profit.lucro >= 0
@@ -71,8 +75,8 @@ export function DashboardPage() {
       <Card className="balance-card">
         <div>
           <span className="card-label">Saldo registrado</span>
-          {loading ? <span className="skeleton skeleton-value" /> : <strong>{formatCurrency(profit.lucro)}</strong>}
-          <small>Resultado das movimentações cadastradas neste mês</small>
+          {loading ? <span className="skeleton skeleton-value" /> : <strong>{formatCurrency(accounts.length ? totalBalance : profit.lucro)}</strong>}
+          <small>{accounts.length ? `Somado entre ${accounts.length} ${accounts.length === 1 ? "conta" : "contas"}` : "Adicione suas contas para acompanhar o patrimônio disponível"}</small>
         </div>
         <span className="balance-icon"><CircleDollarSign aria-hidden="true" size={26} /></span>
       </Card>
@@ -144,7 +148,7 @@ export function DashboardPage() {
                     </span>
                     <span className="transaction-info">
                       <strong>{transaction.comentario || transaction.categoria || (isIncome ? "Receita" : "Despesa")}</strong>
-                      <small>{transaction.categoria || "Sem categoria"} · {formatDate(transaction.data)}</small>
+                      <small>{transaction.categoria || "Sem categoria"} · {transaction.conta} · {formatDate(transaction.data)}</small>
                     </span>
                     <strong className={isIncome ? "amount-income" : "amount-expense"}>
                       {isIncome ? "+" : "−"} {formatCurrency(transaction.valor)}

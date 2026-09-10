@@ -1,5 +1,5 @@
-import { ArrowDownLeft, ArrowUpRight, ReceiptText, WalletCards } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ArrowDownLeft, ArrowUpRight, ReceiptText, Search } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -10,7 +10,7 @@ import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { Feedback } from "../components/ui/Feedback";
 import { PageHeader } from "../components/ui/PageHeader";
-import type { Category, Transaction, TransactionSummary } from "../types";
+import type { Account, Category, Transaction, TransactionSummary } from "../types";
 import { formatCurrency, formatDate } from "../utils/formatters";
 
 export function TransactionsPage() {
@@ -21,28 +21,48 @@ export function TransactionsPage() {
   const [summary, setSummary] = useState<TransactionSummary>({ entradas: 0, saidas: 0, saldo: 0 });
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [valor, setValor] = useState(0);
   const [tipo, setTipo] = useState<"entrada" | "saida">("saida");
   const [categoriaId, setCategoriaId] = useState<number | null>(null);
+  const [accountId, setAccountId] = useState<number | null>(null);
   const [comentario, setComentario] = useState("");
   const [data, setData] = useState(today);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<"todos" | "entrada" | "saida">("todos");
+
+  const filteredTransactions = useMemo(() => {
+    const normalizedSearch = search.trim().toLocaleLowerCase("pt-BR");
+    return transactions.filter((transaction) => {
+      const matchesType = typeFilter === "todos" || transaction.tipo === typeFilter;
+      const matchesSearch = !normalizedSearch || [
+        transaction.comentario,
+        transaction.categoria,
+        transaction.conta,
+      ].some((value) => value?.toLocaleLowerCase("pt-BR").includes(normalizedSearch));
+      return matchesType && matchesSearch;
+    });
+  }, [search, transactions, typeFilter]);
 
   async function load() {
     if (!user) return;
     try {
       setLoading(true);
-      const [summaryData, transactionData, categoryData] = await Promise.all([
+      const [summaryData, transactionData, categoryData, accountData] = await Promise.all([
         api.getTransactionSummary(user.id),
         api.getTransactions(user.id),
         api.getCategories(user.id),
+        api.getAccounts(user.id),
       ]);
       setSummary(summaryData);
       setTransactions(transactionData);
       setCategories(categoryData);
+      setAccounts(accountData);
+      setAccountId((current) => current ?? accountData[0]?.id ?? null);
       setError("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível carregar suas transações.");
@@ -74,6 +94,7 @@ export function TransactionsPage() {
         categoria_id: tipo === "saida" ? categoriaId : null,
         comentario,
         data,
+        conta_id: accountId,
       });
       setValor(0);
       setComentario("");
@@ -137,6 +158,14 @@ export function TransactionsPage() {
             ) : null}
 
             <label>
+              Conta
+              <select onChange={(event) => setAccountId(event.target.value ? Number(event.target.value) : null)} value={accountId ?? ""}>
+                <option value="">Sem conta</option>
+                {accounts.map((account) => <option key={account.id} value={account.id}>{account.nome}</option>)}
+              </select>
+            </label>
+
+            <label>
               Data
               <input onChange={(event) => setData(event.target.value)} type="date" value={data} />
             </label>
@@ -149,16 +178,25 @@ export function TransactionsPage() {
         <Card as="section" className="transactions-history">
           <div className="card-heading card-heading-row">
             <div><span className="section-kicker">Histórico</span><h2>Suas movimentações</h2></div>
-            <span className="count-badge">{transactions.length}</span>
+            <span className="count-badge">{filteredTransactions.length}</span>
+          </div>
+
+          <div className="transaction-filters">
+            <label className="search-field"><Search aria-hidden="true" size={17} /><input aria-label="Buscar transações" onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por descrição, categoria ou conta" value={search} /></label>
+            <select aria-label="Filtrar por tipo" onChange={(event) => setTypeFilter(event.target.value as typeof typeFilter)} value={typeFilter}>
+              <option value="todos">Todos os tipos</option>
+              <option value="saida">Despesas</option>
+              <option value="entrada">Receitas</option>
+            </select>
           </div>
 
           {loading ? (
             <div className="transaction-list">{[1, 2, 3, 4].map((item) => <span className="skeleton skeleton-row" key={item} />)}</div>
-          ) : transactions.length === 0 ? (
-            <EmptyState description="Sua primeira movimentação aparecerá aqui assim que for adicionada." icon={ReceiptText} title="Nenhuma transação registrada" />
+          ) : filteredTransactions.length === 0 ? (
+            <EmptyState description={transactions.length === 0 ? "Sua primeira movimentação aparecerá aqui assim que for adicionada." : "Tente ajustar a busca ou o tipo selecionado."} icon={ReceiptText} title={transactions.length === 0 ? "Nenhuma transação registrada" : "Nenhum resultado encontrado"} />
           ) : (
             <div className="transaction-list">
-              {transactions.map((transaction) => {
+              {filteredTransactions.map((transaction) => {
                 const isIncome = transaction.tipo === "entrada";
                 return (
                   <div className="transaction-row" key={transaction.id}>
@@ -167,7 +205,7 @@ export function TransactionsPage() {
                     </span>
                     <span className="transaction-info">
                       <strong>{transaction.comentario || (isIncome ? "Receita" : "Despesa")}</strong>
-                      <small>{transaction.categoria || "Sem categoria"} · {formatDate(transaction.data)}</small>
+                      <small>{transaction.categoria || "Sem categoria"} · {transaction.conta} · {formatDate(transaction.data)}</small>
                     </span>
                     <strong className={isIncome ? "amount-income" : "amount-expense"}>{isIncome ? "+" : "−"} {formatCurrency(transaction.valor)}</strong>
                   </div>
@@ -178,7 +216,6 @@ export function TransactionsPage() {
         </Card>
       </div>
 
-      <p className="phase-note"><WalletCards size={16} /> Contas e transferências serão conectadas a este fluxo na Fase 2.</p>
     </div>
   );
 }

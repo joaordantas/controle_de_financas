@@ -26,6 +26,7 @@ def create_transaction(payload: TransactionCreate) -> TransactionCreate:
             payload.comentario,
             payload.data,
             payload.usuario_id,
+            payload.conta_id,
         )
         return TransactionCreate(**transacao)
     except ValueError as exc:

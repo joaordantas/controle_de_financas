@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, PiggyBank, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, Moon, PiggyBank, ShieldCheck, Sparkles, Sun } from "lucide-react";
 import { useState } from "react";
 import type { FormEvent } from "react";
 
@@ -6,12 +6,14 @@ import { api } from "../services/api";
 import { Button } from "../components/ui/Button";
 import { Feedback } from "../components/ui/Feedback";
 import type { User } from "../types";
+import { useTheme } from "../app/providers";
 
 interface AuthViewProps {
   onLogin: (user: User) => void;
 }
 
 export function AuthView({ onLogin }: AuthViewProps) {
+  const { theme, toggleTheme } = useTheme();
   const [tab, setTab] = useState<"login" | "cadastro">("login");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -78,6 +80,9 @@ export function AuthView({ onLogin }: AuthViewProps) {
       </section>
 
       <section className="auth-form-panel">
+        <button aria-label={theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro"} className="icon-button auth-theme-button" onClick={toggleTheme} type="button">
+          {theme === "dark" ? <Sun aria-hidden="true" size={18} /> : <Moon aria-hidden="true" size={18} />}
+        </button>
         <div className="auth-form-wrap">
           <div className="auth-form-heading">
             <h2>{tab === "login" ? "Boas-vindas" : "Crie sua conta"}</h2>

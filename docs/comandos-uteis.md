@@ -27,11 +27,6 @@ Rodar frontend:
 npm run dev
 ```
 
-## Streamlit legado
-```bash
-streamlit run app.py
-```
-
 ## Dicas
 - Rode backend e frontend em terminais separados
 - Se a API nao abrir, teste `http://127.0.0.1:8000/docs`

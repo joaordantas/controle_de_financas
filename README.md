@@ -1,86 +1,75 @@
-# Controle de Financas
+# Controle de Finanças
 
-Projeto pessoal em evolucao para controle financeiro, vendas e cobrancas.
+Assistente financeiro pessoal construído com FastAPI, React, TypeScript e SQLite. O produto busca reduzir o trabalho manual necessário para registrar, acompanhar e entender as finanças pessoais.
 
-## Estado atual
-- App legado em Streamlit continua disponivel em `app.py`
-- Nova API em FastAPI criada em `backend/`
-- Novo frontend React + TypeScript criado em `frontend/`
-- Banco SQLite continua em `storage/banco.db`
+## Fase atual
 
-## Objetivo da migracao
-Migrar gradualmente do Streamlit para uma interface propria em React, mantendo o backend em Python e transformando a logica atual em uma API reutilizavel.
+**Fase 2 — Núcleo Financeiro em andamento.**
+
+A Fase 1 estabeleceu a nova fundação do frontend, com rotas reais, layout responsivo, navegação para desktop e celular e componentes visuais reutilizáveis.
+
+O primeiro bloco da Fase 2 adiciona:
+
+- contas financeiras e saldo por conta;
+- receitas e despesas vinculadas a contas;
+- transferências que não alteram receitas ou despesas;
+- busca e filtro básico de transações;
+- Dashboard conectado ao saldo das contas;
+- tema claro e escuro com identidade visual em índigo.
+
+Ainda fazem parte da Fase 2: edição e desativação de contas, edição e exclusão de transações, filtros por período e melhorias na gestão de categorias.
 
 ## Estrutura principal
+
 ```text
-backend/      -> nova API FastAPI
-frontend/     -> nova interface React + TypeScript
-database/     -> conexao e schema SQLite
-repositories/ -> acesso a dados
-services/     -> regras de negocio
-storage/      -> banco SQLite
-app.py        -> app legado em Streamlit
+backend/      API FastAPI e rotas
+database/     conexão e criação incremental do schema SQLite
+repositories/ persistência de dados
+services/     regras de negócio
+frontend/     interface React + TypeScript
+storage/      banco SQLite de desenvolvimento
+tests/        testes automatizados do núcleo financeiro
 ```
 
-## O que ja foi iniciado
-- Rotas de autenticacao
-- Rotas de categorias
-- Rotas de transacoes
-- Rotas de dashboard
-- Rotas de vendas e parcelas
-- Estrutura visual inicial em React
-- Refatoracao inicial dos services
-- Fluxo atomico para pagamento de parcela + lancamento financeiro
+## Executar o backend
 
-## Como rodar o backend
-1. Crie e ative um ambiente virtual
-2. Instale dependencias:
+Crie e ative um ambiente virtual, instale as dependências e inicie a API:
+
 ```bash
 pip install -r requirements.txt
-```
-3. Rode a API:
-```bash
 uvicorn backend.main:app --reload
 ```
 
-## Como rodar o frontend
-Requisito: ter Node.js e npm instalados.
+A documentação da API fica disponível em `http://127.0.0.1:8000/docs`.
 
-1. Entre na pasta do frontend:
+## Executar o frontend
+
+Com Node.js e npm instalados:
+
 ```bash
 cd frontend
-```
-2. Instale dependencias:
-```bash
 npm install
-```
-3. Rode o projeto:
-```bash
 npm run dev
 ```
 
-Frontend padrao:
-- URL: `http://localhost:5173`
-- API esperada: `http://127.0.0.1:8000`
+O frontend fica disponível em `http://localhost:5173` e usa `http://127.0.0.1:8000` como API por padrão.
 
-Se quiser trocar a URL da API depois, crie um `.env` no `frontend/` com:
+Para configurar outra URL, crie `frontend/.env`:
+
 ```bash
 VITE_API_URL=http://127.0.0.1:8000
 ```
 
-## Como rodar o app antigo
+## Verificações
+
 ```bash
-streamlit run app.py
+python -m unittest discover -s tests -v
+cd frontend
+npm run build
 ```
 
-## Proximos passos sugeridos
-- Testar a API rota por rota
-- Instalar Node.js para validar o frontend
-- Migrar o login real na nova interface
-- Migrar categorias e financeiro por fluxo completo
-- Revisar o app Streamlit para consumir services mais claros quando fizer sentido
+## Guias do projeto
 
-## Guias de estudo
 - `docs/trilha-estudos.md`
 - `docs/anotacoes-projeto.md`
 - `docs/comandos-uteis.md`
