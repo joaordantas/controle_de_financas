@@ -1,3 +1,15 @@
+[project]
+name = "controle-de-financas"
+version = "0.2.0"
+description = "Assistente financeiro pessoal com FastAPI e React."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "bcrypt",
+    "email-validator",
+    "fastapi>=0.141.1,<1.0",
+    "uvicorn",
+]
+
 [tool.vercel]
 entrypoint = "backend.main:app"
 
