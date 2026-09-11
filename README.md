@@ -14,7 +14,7 @@ A Nivra está sendo desenvolvida para tornar o controle financeiro mais rápido,
 [![Neon](https://img.shields.io/badge/Neon-database-00E599?logo=neon&logoColor=black)](https://neon.tech/)
 [![Vercel](https://img.shields.io/badge/Vercel-deploy-000000?logo=vercel&logoColor=white)](https://vercel.com/)
 
-[Roadmap](docs/roadmap.md) · [Arquitetura](docs/architecture.md) · [Desenvolvimento](docs/development.md) · [Release notes](docs/releases/v0.1.0-alpha.1.md) · [Releases](https://github.com/joaordantas/nivra/releases)
+[Roadmap](docs/roadmap.md) · [Arquitetura](docs/architecture.md) · [Desenvolvimento](docs/development.md) · [Release notes](docs/releases/v0.1.0-alpha.1.md) · [Releases](https://github.com/joaordantas/Nivra/releases)
 
 </div>
 

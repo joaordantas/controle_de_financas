@@ -52,5 +52,5 @@ Todas as alterações importantes da Nivra serão documentadas neste arquivo. O 
 - credenciais de banco permanecem exclusivamente no backend e em variáveis de ambiente;
 - a autenticação atual continua temporária e ainda não é adequada para armazenar dados financeiros críticos.
 
-[Unreleased]: https://github.com/joaordantas/nivra/compare/v0.1.0-alpha.1...HEAD
-[0.1.0-alpha.1]: https://github.com/joaordantas/nivra/releases/tag/v0.1.0-alpha.1
+[Unreleased]: https://github.com/joaordantas/Nivra/compare/v0.1.0-alpha.1...HEAD
+[0.1.0-alpha.1]: https://github.com/joaordantas/Nivra/releases/tag/v0.1.0-alpha.1

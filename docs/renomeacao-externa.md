@@ -6,7 +6,7 @@ Este guia prepara a mudança dos nomes públicos dos serviços sem alterar crede
 
 | Serviço | Nome atual | Nome desejado |
 | --- | --- | --- |
-| GitHub | `joaordantas/controle_de_financas` | `joaordantas/nivra` |
+| GitHub | `joaordantas/controle_de_financas` | `joaordantas/Nivra` |
 | Vercel | `controle-de-financas` | `nivra` |
 | Neon | `nivra-db` | manter `nivra-db` |
 
@@ -19,11 +19,11 @@ Este guia prepara a mudança dos nomes públicos dos serviços sem alterar crede
 5. Somente depois disso, atualize o remote no computador:
 
 ```bash
-git remote set-url origin https://github.com/joaordantas/nivra.git
+git remote set-url origin https://github.com/joaordantas/Nivra.git
 git remote -v
 ```
 
-6. Confirme que fetch e push apontam para `https://github.com/joaordantas/nivra.git`.
+6. Confirme que fetch e push apontam para `https://github.com/joaordantas/Nivra.git`.
 7. Confirme que os links absolutos do README e do changelog abrem o repositório renomeado.
 8. Verifique a integração Git da Vercel e confirme que ela continua vinculada ao repositório renomeado e à branch `main`.
 
