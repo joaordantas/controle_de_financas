@@ -10,7 +10,7 @@ Este documento registra o estado dos nomes públicos e os cuidados necessários 
 | Vercel | `controle-de-financas` | projeto `nivra` — concluído |
 | Neon | `nivra-db` | manter `nivra-db` |
 
-O domínio de produção confirmado na Vercel continua sendo `controle-de-financas-rho.vercel.app`. O nome do projeto foi atualizado, mas a Vercel não atribuiu automaticamente um novo domínio principal com o nome Nivra.
+O domínio de produção confirmado na Vercel é `nivra-finance.vercel.app`.
 
 ## Remote do GitHub
 
@@ -25,14 +25,14 @@ Confirme que fetch e push apontam para `https://github.com/joaordantas/Nivra.git
 
 ## Vercel
 
-O projeto `nivra` já está conectado a `joaordantas/Nivra` e à branch `main`. Para substituir o domínio técnico anterior no futuro:
+O projeto `nivra` já está conectado a `joaordantas/Nivra` e à branch `main`. Se o domínio precisar ser substituído no futuro:
 
 1. abra o projeto `nivra` na Vercel;
 2. acesse **Settings > Domains**;
 3. adicione ou selecione um domínio que esteja realmente disponível;
 4. aguarde a configuração ficar válida;
 5. teste a interface, `/api/health` e `/docs` nesse endereço;
-6. somente então substitua `controle-de-financas-rho.vercel.app` no README e nos demais materiais públicos.
+6. somente então substitua `nivra-finance.vercel.app` no README e nos demais materiais públicos.
 
 Não presuma que `nivra.vercel.app` estará disponível.
 
@@ -47,7 +47,7 @@ Não presuma que `nivra.vercel.app` estará disponível.
 
 - `git remote -v` mostra o endereço canônico do repositório Nivra;
 - a Vercel continua conectada a `joaordantas/Nivra` e à branch `main`;
-- o domínio atual permanece válido até que um substituto seja confirmado;
+- `nivra-finance.vercel.app` responde como domínio de produção;
 - as variáveis de ambiente continuam presentes nos ambientes usados pelo projeto;
 - um deploy novo abre a interface Nivra e conecta à API e ao Neon normalmente;
 - os dados persistem após o deploy.
