@@ -235,7 +235,7 @@ Resultado final: 19 testes executados e 19 aprovados.
 - compilação Python de `backend`, `database`, `repositories` e `services`: aprovada;
 - consistência das dependências Python com `pip check`: aprovada;
 - TypeScript e build de produção Vite: aprovados;
-- pacote principal do frontend: 324,39 kB, 98,49 kB compactado;
+- pacote principal do frontend: 324,41 kB, 98,51 kB compactado;
 - OpenAPI: 10 caminhos principais da Fase 3A validados;
 - health check, documentação da API e fallback da SPA: HTTP 200;
 - teste visual de Contas e CardsPage: aprovado;
