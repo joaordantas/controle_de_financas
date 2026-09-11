@@ -14,7 +14,7 @@ A Nivra está sendo desenvolvida para tornar o controle financeiro mais rápido,
 [![Neon](https://img.shields.io/badge/Neon-database-00E599?logo=neon&logoColor=black)](https://neon.tech/)
 [![Vercel](https://img.shields.io/badge/Vercel-deploy-000000?logo=vercel&logoColor=white)](https://vercel.com/)
 
-[Roadmap](docs/roadmap.md) · [Arquitetura](docs/architecture.md) · [Desenvolvimento](docs/development.md) · [Release notes](docs/releases/v0.1.0-alpha.1.md) · [Releases](https://github.com/joaordantas/Nivra/releases)
+[Aplicação online](https://controle-de-financas-rho.vercel.app) · [Roadmap](docs/roadmap.md) · [Arquitetura](docs/architecture.md) · [Desenvolvimento](docs/development.md) · [Release notes](docs/releases/v0.1.0-alpha.1.md) · [Releases](https://github.com/joaordantas/Nivra/releases)
 
 </div>
 
@@ -76,7 +76,7 @@ A aplicação já possui telas funcionais, mas as capturas públicas ainda não 
 | Cartões e faturas | Pendente |
 | Experiência mobile | Pendente |
 
-A URL pública da aplicação será adicionada quando o endereço oficial da Vercel for confirmado no repositório.
+A aplicação está disponível no [domínio de produção confirmado na Vercel](https://controle-de-financas-rho.vercel.app). O endereço ainda conserva o nome técnico anterior; ele só será substituído na documentação quando um novo domínio real estiver configurado e validado.
 
 ## ✦ Lumi — em desenvolvimento
 
