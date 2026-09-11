@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowRight, ArrowRightLeft, Landmark, Pencil, Plus, Power, WalletCards } from "lucide-react";
+import { ArrowDownLeft, ArrowRight, ArrowRightLeft, Landmark, Pencil, Plus, Power, Star, WalletCards } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
@@ -46,7 +46,7 @@ export function AccountsPage() {
   const activeAccounts = useMemo(() => accounts.filter((account) => account.ativo), [accounts]);
   const totalBalance = useMemo(() => activeAccounts.reduce((total, account) => total + account.saldo_atual, 0), [activeAccounts]);
 
-  async function load() {
+  async function load(preferredSourceId?: number) {
     if (!user) return;
     try {
       setLoading(true);
@@ -54,8 +54,16 @@ export function AccountsPage() {
       setAccounts(accountData);
       setTransfers(transferData);
       const availableAccounts = accountData.filter((account) => account.ativo);
-      setSourceId((current) => availableAccounts.some((account) => account.id === current) ? current : availableAccounts[0]?.id ?? 0);
-      setDestinationId((current) => availableAccounts.some((account) => account.id === current) ? current : availableAccounts[1]?.id ?? 0);
+      const primaryAccount = availableAccounts.find((account) => account.principal);
+      const defaultSourceId = primaryAccount?.id ?? availableAccounts[0]?.id ?? 0;
+      const requestedSourceId = preferredSourceId ?? sourceId;
+      const resolvedSourceId = availableAccounts.some((account) => account.id === requestedSourceId) ? requestedSourceId : defaultSourceId;
+      setSourceId(resolvedSourceId);
+      setDestinationId((current) => (
+        availableAccounts.some((account) => account.id === current && account.id !== resolvedSourceId)
+          ? current
+          : availableAccounts.find((account) => account.id !== resolvedSourceId)?.id ?? 0
+      ));
       setError("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível carregar suas contas.");
@@ -125,6 +133,19 @@ export function AccountsPage() {
     }
   }
 
+  async function setPrimaryAccount(account: Account) {
+    if (!user || account.principal) return;
+    try {
+      await api.setPrimaryAccount(account.id, user.id);
+      setMessage(`${account.nome} agora é sua conta principal.`);
+      setError("");
+      await load(account.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível definir a conta principal.");
+      setMessage("");
+    }
+  }
+
   async function handleTransfer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!user) return;
@@ -159,12 +180,17 @@ export function AccountsPage() {
           <Card className={`account-card ${account.ativo ? "" : "account-card-inactive"}`} key={account.id}>
             <span className="account-icon"><WalletCards aria-hidden="true" size={21} /></span>
             <div><small>{accountTypeLabels[account.tipo]}</small><h2>{account.nome}</h2></div>
-            <span className={`status-badge ${account.ativo ? "active" : "inactive"}`}>{account.ativo ? "Ativa" : "Inativa"}</span>
+            <span className="account-badges">
+              {account.principal ? <span className="status-badge primary"><Star size={12} />Principal</span> : null}
+              <span className={`status-badge ${account.ativo ? "active" : "inactive"}`}>{account.ativo ? "Ativa" : "Inativa"}</span>
+            </span>
             <strong>{formatCurrency(account.saldo_atual)}</strong>
             <span className="account-actions">
+              {account.ativo && !account.principal ? <button aria-label={`Definir ${account.nome} como principal`} className="icon-button" onClick={() => void setPrimaryAccount(account)} title="Definir como principal" type="button"><Star size={15} /></button> : null}
               <button aria-label={`Editar ${account.nome}`} className="icon-button" onClick={() => openAccountEditor(account)} type="button"><Pencil size={15} /></button>
               <button aria-label={`${account.ativo ? "Desativar" : "Reativar"} ${account.nome}`} className="icon-button" onClick={() => void toggleAccount(account)} type="button"><Power size={15} /></button>
             </span>
+            {account.percentual_uso > 0 ? <small className="account-usage">{account.percentual_uso.toLocaleString("pt-BR")}% das movimentações dos últimos 90 dias{account.mais_utilizada ? " · mais utilizada" : ""}</small> : null}
           </Card>
         ))}
       </section>

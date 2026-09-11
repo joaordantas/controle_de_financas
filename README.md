@@ -4,11 +4,11 @@ Assistente financeiro pessoal construído com FastAPI, React, TypeScript e SQLit
 
 ## Fase atual
 
-**Fase 2 — Núcleo Financeiro concluída.**
+**Fase 3A — Conta principal, cartões e faturas concluída.**
 
 A Fase 1 estabeleceu a nova fundação do frontend, com rotas reais, layout responsivo, navegação para desktop e celular e componentes visuais reutilizáveis.
 
-A Fase 2 entrega:
+A Fase 2 entregou:
 
 - contas financeiras e saldo por conta;
 - receitas e despesas vinculadas a contas;
@@ -22,7 +22,23 @@ A Fase 2 entrega:
 - Dashboard conectado ao saldo das contas;
 - tema claro e escuro com identidade visual em índigo.
 
-O próximo passo planejado é a **Fase 3 — Planejamento Financeiro**, com cartões, faturas, parcelamentos, recorrências, orçamentos e metas. Ela ainda não foi iniciada.
+A Fase 3A entrega:
+
+- escolha atômica de uma conta principal por usuário;
+- identificação dinâmica da conta mais utilizada nos últimos 90 dias;
+- cartões de crédito com limite calculado em tempo real;
+- compras no cartão vinculadas automaticamente ao ciclo correto;
+- fatura atual, histórico, detalhes e estados derivados;
+- pagamento integral da fatura por uma conta financeira;
+- compra contabilizada como despesa e pagamento tratado como liquidação, sem duplicar gastos;
+- interface responsiva para criar e administrar cartões, compras e faturas.
+
+As próximas etapas permanecem separadas e pendentes:
+
+- **Fase 3B:** parcelamentos;
+- **Fase 3C:** recorrências;
+- **Fase 3D:** orçamentos;
+- **Fase 3E:** metas financeiras.
 
 ## Estrutura principal
 
@@ -84,3 +100,5 @@ npm run build
 - `docs/trilha-estudos.md`
 - `docs/anotacoes-projeto.md`
 - `docs/comandos-uteis.md`
+- `docs/relatorio-fases-1-e-2.md`
+- `docs/relatorio-fase-3a.md`

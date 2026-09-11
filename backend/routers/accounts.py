@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from backend.schemas.accounts import (
     AccountCreate,
     AccountResponse,
+    AccountPrimaryUpdate,
     AccountStatusUpdate,
     AccountUpdate,
     TransferCreate,
@@ -17,6 +18,7 @@ from services.conta_service import (
     atualizar_conta_service,
     criar_conta_service,
     listar_contas_formatadas,
+    definir_conta_principal_service,
 )
 from services.transferencia_service import (
     atualizar_transferencia_service,
@@ -79,6 +81,16 @@ def update_account_status(conta_id: int, payload: AccountStatusUpdate) -> Accoun
     try:
         return AccountResponse(
             **alterar_status_conta_service(conta_id, payload.ativo, payload.usuario_id)
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.patch("/accounts/{conta_id}/primary", response_model=AccountResponse)
+def update_account_primary(conta_id: int, payload: AccountPrimaryUpdate) -> AccountResponse:
+    try:
+        return AccountResponse(
+            **definir_conta_principal_service(conta_id, payload.usuario_id)
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { AppLayout } from "../components/layout/AppLayout";
 import { ComingSoonPage } from "../pages/ComingSoonPage";
+import { CardsPage } from "../pages/CardsPage";
 import { DashboardPage } from "../pages/DashboardPage";
 import { LoginPage } from "../pages/LoginPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
@@ -43,10 +44,7 @@ const router = createBrowserRouter([
       { path: "dashboard", element: <DashboardPage /> },
       { path: "transactions", element: <TransactionsPage /> },
       { path: "accounts", element: <AccountsPage /> },
-      {
-        path: "cards",
-        element: <ComingSoonPage description="Cartões, faturas e parcelamentos fazem parte da etapa de planejamento." title="Cartões" />,
-      },
+      { path: "cards", element: <CardsPage /> },
       {
         path: "budgets",
         element: <ComingSoonPage description="Os orçamentos por categoria serão adicionados na etapa de planejamento." title="Orçamentos" />,

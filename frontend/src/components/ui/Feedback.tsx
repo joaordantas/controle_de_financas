@@ -1,7 +1,8 @@
 import { AlertCircle, CheckCircle2 } from "lucide-react";
+import type { ReactNode } from "react";
 
 interface FeedbackProps {
-  children: string;
+  children: ReactNode;
   tone?: "error" | "success";
 }
 

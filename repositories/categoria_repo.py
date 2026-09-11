@@ -63,11 +63,20 @@ def nome_categoria_existe(nome: str, usuario_id: int, ignorar_id: int | None = N
 def categoria_em_uso(categoria_id: int, usuario_id: int) -> bool:
     conn = get_connection()
     try:
-        return conn.execute(
+        em_transacao = conn.execute(
             """
             SELECT 1 FROM transacoes
             WHERE categoria_id = ? AND usuario_id = ?
             LIMIT 1
+            """,
+            (categoria_id, usuario_id),
+        ).fetchone() is not None
+        if em_transacao:
+            return True
+        return conn.execute(
+            """
+            SELECT 1 FROM compras_cartao
+            WHERE categoria_id = ? AND usuario_id = ? LIMIT 1
             """,
             (categoria_id, usuario_id),
         ).fetchone() is not None

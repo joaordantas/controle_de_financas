@@ -116,7 +116,7 @@ def deletar_transacao(transacao_id: int, usuario_id: int) -> bool:
 def calcular_resumo(usuario_id: int) -> tuple[float, float, float]:
     conn = get_connection()
     try:
-        entradas, saidas = conn.execute(
+        entradas, saidas_transacoes = conn.execute(
             """
             SELECT
                 COALESCE(SUM(CASE WHEN tipo = 'entrada' THEN valor ELSE 0 END), 0),
@@ -126,6 +126,11 @@ def calcular_resumo(usuario_id: int) -> tuple[float, float, float]:
             """,
             (usuario_id,),
         ).fetchone()
+        saidas_cartao = conn.execute(
+            "SELECT COALESCE(SUM(valor), 0) FROM compras_cartao WHERE usuario_id = ?",
+            (usuario_id,),
+        ).fetchone()[0]
+        saidas = float(saidas_transacoes) + float(saidas_cartao)
         return float(entradas), float(saidas), float(entradas - saidas)
     finally:
         conn.close()

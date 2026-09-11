@@ -22,6 +22,10 @@ class AccountStatusUpdate(BaseModel):
     usuario_id: int = Field(ge=1)
 
 
+class AccountPrimaryUpdate(BaseModel):
+    usuario_id: int = Field(ge=1)
+
+
 class AccountResponse(BaseModel):
     id: int
     nome: str
@@ -29,6 +33,9 @@ class AccountResponse(BaseModel):
     saldo_inicial: float
     saldo_atual: float
     ativo: bool
+    principal: bool = False
+    percentual_uso: float = 0
+    mais_utilizada: bool = False
 
 
 class TransferCreate(BaseModel):

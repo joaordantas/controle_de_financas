@@ -59,12 +59,14 @@ export function MovementForm({
   }
 
   function selectType(tipo: MovementType) {
+    const primaryAccount = accounts.find((account) => account.principal) ?? accounts[0];
+    const secondAccount = accounts.find((account) => account.id !== primaryAccount?.id);
     setValues((current) => ({
       ...current,
       tipo,
-      contaId: tipo === "transferencia" ? null : current.contaId ?? accounts[0]?.id ?? null,
-      contaOrigemId: current.contaOrigemId || accounts[0]?.id || 0,
-      contaDestinoId: current.contaDestinoId || accounts[1]?.id || 0,
+      contaId: tipo === "transferencia" ? null : current.contaId ?? primaryAccount?.id ?? null,
+      contaOrigemId: current.contaOrigemId || primaryAccount?.id || 0,
+      contaDestinoId: current.contaDestinoId || secondAccount?.id || 0,
     }));
   }
 

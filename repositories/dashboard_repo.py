@@ -16,6 +16,13 @@ def lucro_por_periodo(data_inicio: str, data_fim: str, usuario_id: int) -> dict:
     for tipo, total in cursor.fetchall():
         resultado[tipo] = total or 0.0
 
+    cursor.execute("""
+        SELECT COALESCE(SUM(valor), 0)
+        FROM compras_cartao
+        WHERE usuario_id = ? AND data BETWEEN ? AND ?
+    """, (usuario_id, data_inicio, data_fim))
+    resultado["saida"] += cursor.fetchone()[0] or 0.0
+
     conn.close()
     resultado["lucro"] = resultado["entrada"] - resultado["saida"]
     return resultado

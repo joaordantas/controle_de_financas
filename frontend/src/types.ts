@@ -31,6 +31,74 @@ export interface Account {
   saldo_inicial: number;
   saldo_atual: number;
   ativo: boolean;
+  principal: boolean;
+  percentual_uso: number;
+  mais_utilizada: boolean;
+}
+
+export type InvoiceStatus = "aberta" | "fechada" | "paga" | "vencida";
+
+export interface Invoice {
+  id: number;
+  cartao_id: number;
+  cartao: string;
+  ano_referencia: number;
+  mes_referencia: number;
+  data_inicio: string;
+  data_fechamento: string;
+  data_vencimento: string;
+  valor_total: number;
+  valor_pago: number;
+  status: InvoiceStatus;
+  data_pagamento: string | null;
+  conta_pagamento_id: number | null;
+  conta_pagamento: string | null;
+  quantidade_compras: number;
+}
+
+export interface Card {
+  id: number;
+  usuario_id: number;
+  nome: string;
+  limite_total: number;
+  limite_utilizado: number;
+  limite_disponivel: number;
+  percentual_utilizado: number;
+  dia_fechamento: number;
+  dia_vencimento: number;
+  ativo: boolean;
+  fatura_atual: Invoice | null;
+}
+
+export interface CardPurchase {
+  id: number;
+  cartao_id: number;
+  cartao: string;
+  fatura_id: number;
+  valor: number;
+  descricao: string;
+  categoria_id: number | null;
+  categoria: string;
+  data: string;
+}
+
+export interface InvoiceDetail extends Invoice {
+  compras: CardPurchase[];
+}
+
+export interface CardFormValues {
+  nome: string;
+  limiteTotal: number;
+  diaFechamento: number;
+  diaVencimento: number;
+}
+
+export interface CardPurchaseFormValues {
+  cartaoId: number;
+  valor: number;
+  descricao: string;
+  categoriaId: number | null;
+  data: string;
 }
 
 export interface Transfer {

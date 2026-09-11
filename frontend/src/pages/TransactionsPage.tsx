@@ -20,15 +20,17 @@ type Movement =
 type TypeFilter = "todos" | MovementType;
 
 function initialForm(accounts: Account[]): MovementFormValues {
+  const defaultAccount = accounts.find((account) => account.principal) ?? accounts[0];
+  const secondAccount = accounts.find((account) => account.id !== defaultAccount?.id);
   return {
     tipo: "saida",
     valor: 0,
     descricao: "",
     data: new Date().toISOString().slice(0, 10),
     categoriaId: null,
-    contaId: accounts[0]?.id ?? null,
-    contaOrigemId: accounts[0]?.id ?? 0,
-    contaDestinoId: accounts[1]?.id ?? 0,
+    contaId: defaultAccount?.id ?? null,
+    contaOrigemId: defaultAccount?.id ?? 0,
+    contaDestinoId: secondAccount?.id ?? 0,
   };
 }
 

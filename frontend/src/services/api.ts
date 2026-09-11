@@ -1,8 +1,12 @@
 import type {
   Account,
   AccountType,
+  Card,
+  CardPurchase,
   Category,
   ClientInstallmentsResponse,
+  Invoice,
+  InvoiceDetail,
   ProfitSummary,
   ReceivableByClient,
   Sale,
@@ -26,8 +30,19 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   if (!response.ok) {
     let detail = "Erro ao se comunicar com a API.";
     try {
-      const body = await response.json();
-      if (body.detail) detail = body.detail;
+      const body: { detail?: unknown } = await response.json();
+      if (typeof body.detail === "string") {
+        detail = body.detail;
+      } else if (Array.isArray(body.detail)) {
+        const messages = body.detail
+          .map((item) => {
+            if (typeof item === "string") return item;
+            if (item && typeof item === "object" && "msg" in item && typeof item.msg === "string") return item.msg;
+            return null;
+          })
+          .filter((message): message is string => Boolean(message));
+        if (messages.length > 0) detail = messages.join(" ");
+      }
     } catch {
       detail = response.statusText || detail;
     }
@@ -115,6 +130,12 @@ export const api = {
       body: JSON.stringify({ usuario_id: usuarioId, ativo }),
     }),
 
+  setPrimaryAccount: (accountId: number, usuarioId: number) =>
+    request<Account>(`/accounts/${accountId}/primary`, {
+      method: "PATCH",
+      body: JSON.stringify({ usuario_id: usuarioId }),
+    }),
+
   getTransfers: (usuarioId: number) =>
     request<Transfer[]>(`/transfers?usuario_id=${usuarioId}`),
 
@@ -138,6 +159,39 @@ export const api = {
 
   deleteTransfer: (transferId: number, usuarioId: number) =>
     request<void>(`/transfers/${transferId}?usuario_id=${usuarioId}`, { method: "DELETE" }),
+
+  getCards: (usuarioId: number, includeInactive = true) =>
+    request<Card[]>(`/cards?usuario_id=${usuarioId}&incluir_inativos=${includeInactive}`),
+
+  createCard: (payload: { usuario_id: number; nome: string; limite_total: number; dia_fechamento: number; dia_vencimento: number }) =>
+    request<Card>("/cards", { method: "POST", body: JSON.stringify(payload) }),
+
+  updateCard: (cardId: number, payload: { usuario_id: number; nome: string; limite_total: number; dia_fechamento: number; dia_vencimento: number }) =>
+    request<Card>(`/cards/${cardId}`, { method: "PUT", body: JSON.stringify(payload) }),
+
+  updateCardStatus: (cardId: number, usuarioId: number, ativo: boolean) =>
+    request<Card>(`/cards/${cardId}/status`, { method: "PATCH", body: JSON.stringify({ usuario_id: usuarioId, ativo }) }),
+
+  getCardInvoices: (cardId: number, usuarioId: number) =>
+    request<Invoice[]>(`/cards/${cardId}/invoices?usuario_id=${usuarioId}`),
+
+  getInvoice: (invoiceId: number, usuarioId: number) =>
+    request<InvoiceDetail>(`/invoices/${invoiceId}?usuario_id=${usuarioId}`),
+
+  createCardPurchase: (payload: { usuario_id: number; cartao_id: number; valor: number; descricao: string; categoria_id: number | null; data: string }) =>
+    request<CardPurchase>("/card-purchases", { method: "POST", body: JSON.stringify(payload) }),
+
+  updateCardPurchase: (purchaseId: number, payload: { usuario_id: number; cartao_id: number; valor: number; descricao: string; categoria_id: number | null; data: string }) =>
+    request<CardPurchase>(`/card-purchases/${purchaseId}`, { method: "PUT", body: JSON.stringify(payload) }),
+
+  deleteCardPurchase: (purchaseId: number, usuarioId: number) =>
+    request<void>(`/card-purchases/${purchaseId}?usuario_id=${usuarioId}`, { method: "DELETE" }),
+
+  payInvoice: (invoiceId: number, usuarioId: number, accountId: number, paymentDate: string) =>
+    request<InvoiceDetail>(`/invoices/${invoiceId}/pay`, {
+      method: "POST",
+      body: JSON.stringify({ usuario_id: usuarioId, conta_id: accountId, data: paymentDate }),
+    }),
 
   getProfit: (usuarioId: number, dataInicio: string, dataFim: string) =>
     request<ProfitSummary>(`/dashboard/profit?usuario_id=${usuarioId}&data_inicio=${dataInicio}&data_fim=${dataFim}`),
