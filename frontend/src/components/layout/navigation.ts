@@ -7,6 +7,7 @@ import {
   PiggyBank,
   ReceiptText,
   Settings,
+  Tags,
   Target,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -35,7 +36,15 @@ export const mobileNavigation: NavigationItem[] = [
   { label: "Início", path: "/dashboard", icon: ChartNoAxesCombined },
   { label: "Transações", path: "/transactions", icon: ReceiptText },
   { label: "Lumi", path: "/assistant", icon: Bot },
-  { label: "Mais", path: "/settings", icon: Settings },
+];
+
+export const mobileMoreFinanceNavigation = primaryNavigation.filter((item) =>
+  ["/accounts", "/cards", "/budgets", "/goals"].includes(item.path),
+);
+
+export const mobileMoreSettingsNavigation: NavigationItem[] = [
+  ...secondaryNavigation,
+  { label: "Categorias", path: "/settings/categories", icon: Tags },
 ];
 
 export const productIcon = PiggyBank;
