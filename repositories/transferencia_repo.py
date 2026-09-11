@@ -25,12 +25,13 @@ def criar_transferencia(
             """
             INSERT INTO transferencias (
                 conta_origem_id, conta_destino_id, valor, descricao, data, usuario_id
-            ) VALUES (?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?) RETURNING id
             """,
             (conta_origem_id, conta_destino_id, valor, descricao, data, usuario_id),
         )
+        transferencia_id = int(cursor.fetchone()[0])
         conn.commit()
-        return int(cursor.lastrowid)
+        return transferencia_id
     except Exception:
         conn.rollback()
         raise

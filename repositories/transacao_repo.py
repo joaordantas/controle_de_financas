@@ -27,12 +27,13 @@ def adicionar_transacao(
             """
             INSERT INTO transacoes (
                 valor, tipo, categoria_id, comentario, data, usuario_id, conta_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id
             """,
             (valor, tipo, categoria_id, comentario, data, usuario_id, conta_id),
         )
+        transacao_id = int(cursor.fetchone()[0])
         conn.commit()
-        return int(cursor.lastrowid)
+        return transacao_id
     finally:
         conn.close()
 

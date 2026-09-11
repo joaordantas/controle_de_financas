@@ -1,15 +1,9 @@
-import os
 import unittest
 from datetime import date
 
-
-TEST_DB_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "storage", "test_accounts.db")
-)
-os.environ["FINANCE_DB_PATH"] = TEST_DB_PATH
+from tests.db_support import remove_test_database, reset_test_database
 
 from database.connection import get_connection
-from database.schema import criar_banco
 from services.cartao_service import (
     alterar_status_cartao_service,
     atualizar_cartao_service,
@@ -36,9 +30,7 @@ from services.transacao_service import obter_resumo_financeiro
 
 class Phase3ATests(unittest.TestCase):
     def setUp(self):
-        if os.path.exists(TEST_DB_PATH):
-            os.remove(TEST_DB_PATH)
-        criar_banco()
+        reset_test_database()
         conn = get_connection()
         conn.execute(
             "INSERT INTO usuarios (id, usuario, email, senha) VALUES (1, 'Teste', 'teste@example.com', 'hash')"
@@ -54,8 +46,7 @@ class Phase3ATests(unittest.TestCase):
         self.categoria_2 = criar_categoria_service("Categoria externa", 2)
 
     def tearDown(self):
-        if os.path.exists(TEST_DB_PATH):
-            os.remove(TEST_DB_PATH)
+        remove_test_database()
 
     def criar_cartao(self, usuario_id: int = 1, limite: float = 1000) -> dict:
         return criar_cartao_service(usuario_id, "Cartao teste", limite, 13, 20)

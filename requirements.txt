@@ -3,3 +3,6 @@ fastapi>=0.141.1,<1.0
 uvicorn
 email-validator
 httpx
+SQLAlchemy>=2.0,<2.1
+psycopg[binary]>=3.2,<4.0
+alembic>=1.14,<2.0

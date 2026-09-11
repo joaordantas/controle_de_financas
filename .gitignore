@@ -5,6 +5,11 @@ node_modules/
 dist/
 *.tsbuildinfo
 storage/*.db
+storage/*.db-shm
+storage/*.db-wal
 .pytest_cache/
 .mypy_cache/
 .DS_Store
+.env
+.env.*
+!.env.example

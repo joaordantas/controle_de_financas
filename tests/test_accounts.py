@@ -1,14 +1,8 @@
-import os
 import unittest
 
-
-TEST_DB_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "storage", "test_accounts.db")
-)
-os.environ["FINANCE_DB_PATH"] = TEST_DB_PATH
+from tests.db_support import remove_test_database, reset_test_database
 
 from database.connection import get_connection
-from database.schema import criar_banco
 from services.categoria_service import (
     criar_categoria_service,
     deletar_categoria_service,
@@ -35,9 +29,7 @@ from services.transferencia_service import (
 
 class AccountBalanceTests(unittest.TestCase):
     def setUp(self):
-        if os.path.exists(TEST_DB_PATH):
-            os.remove(TEST_DB_PATH)
-        criar_banco()
+        reset_test_database()
         conn = get_connection()
         conn.execute(
             "INSERT INTO usuarios (id, usuario, email, senha) VALUES (1, 'Teste', 'teste@example.com', 'hash')"
@@ -49,8 +41,7 @@ class AccountBalanceTests(unittest.TestCase):
         conn.close()
 
     def tearDown(self):
-        if os.path.exists(TEST_DB_PATH):
-            os.remove(TEST_DB_PATH)
+        remove_test_database()
 
     def test_transferencia_altera_contas_sem_alterar_resumo(self):
         origem = criar_conta_service("Conta A", "digital", 1000, 1)

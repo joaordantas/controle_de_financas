@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query, status
-from sqlite3 import IntegrityError
+from sqlalchemy.exc import IntegrityError
 
 from backend.schemas.categories import CategoryCreate, CategoryResponse, CategoryUpdate
 from services.categoria_service import (

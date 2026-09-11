@@ -55,12 +55,13 @@ def criar_cartao(
             """
             INSERT INTO cartoes (
                 usuario_id, nome, limite_total, dia_fechamento, dia_vencimento
-            ) VALUES (?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?) RETURNING id
             """,
             (usuario_id, nome, limite_total, dia_fechamento, dia_vencimento),
         )
+        cartao_id = int(cursor.fetchone()[0])
         conn.commit()
-        return int(cursor.lastrowid)
+        return cartao_id
     finally:
         conn.close()
 
@@ -68,11 +69,11 @@ def criar_cartao(
 def listar_cartoes(usuario_id: int, incluir_inativos: bool = True) -> list[tuple]:
     conn = get_connection()
     try:
-        filtro = "" if incluir_inativos else "AND c.ativo = 1"
+        filtro = "" if incluir_inativos else "AND c.ativo = TRUE"
         return conn.execute(
             f"""{CARD_SELECT}
             WHERE c.usuario_id = ? {filtro}
-            ORDER BY c.ativo DESC, c.nome COLLATE NOCASE
+            ORDER BY c.ativo DESC, LOWER(c.nome)
             """,
             (usuario_id,),
         ).fetchall()
@@ -83,7 +84,7 @@ def listar_cartoes(usuario_id: int, incluir_inativos: bool = True) -> list[tuple
 def buscar_cartao(cartao_id: int, usuario_id: int, somente_ativo: bool = False) -> tuple | None:
     conn = get_connection()
     try:
-        filtro = "AND c.ativo = 1" if somente_ativo else ""
+        filtro = "AND c.ativo = TRUE" if somente_ativo else ""
         return conn.execute(
             f"""{CARD_SELECT}
             WHERE c.id = ? AND c.usuario_id = ? {filtro}
@@ -127,7 +128,7 @@ def alterar_status_cartao(cartao_id: int, usuario_id: int, ativo: bool) -> bool:
             UPDATE cartoes SET ativo = ?, atualizado_em = CURRENT_TIMESTAMP
             WHERE id = ? AND usuario_id = ?
             """,
-            (int(ativo), cartao_id, usuario_id),
+            (ativo, cartao_id, usuario_id),
         )
         conn.commit()
         return cursor.rowcount > 0
@@ -148,10 +149,11 @@ def garantir_fatura(
     try:
         conn.execute(
             """
-            INSERT OR IGNORE INTO faturas (
+            INSERT INTO faturas (
                 cartao_id, usuario_id, ano_referencia, mes_referencia,
                 data_inicio, data_fechamento, data_vencimento
             ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (cartao_id, ano_referencia, mes_referencia) DO NOTHING
             """,
             (
                 cartao_id,
@@ -183,7 +185,7 @@ def listar_faturas(cartao_id: int, usuario_id: int) -> list[tuple]:
         return conn.execute(
             f"""{INVOICE_SELECT}
             WHERE f.cartao_id = ? AND f.usuario_id = ?
-            GROUP BY f.id
+            GROUP BY f.id, c.nome
             ORDER BY f.ano_referencia DESC, f.mes_referencia DESC
             """,
             (cartao_id, usuario_id),
@@ -198,7 +200,7 @@ def buscar_fatura(fatura_id: int, usuario_id: int) -> tuple | None:
         return conn.execute(
             f"""{INVOICE_SELECT}
             WHERE f.id = ? AND f.usuario_id = ?
-            GROUP BY f.id
+            GROUP BY f.id, c.nome
             """,
             (fatura_id, usuario_id),
         ).fetchone()
@@ -215,7 +217,7 @@ def buscar_fatura_periodo(
             f"""{INVOICE_SELECT}
             WHERE f.cartao_id = ? AND f.usuario_id = ?
               AND f.ano_referencia = ? AND f.mes_referencia = ?
-            GROUP BY f.id
+            GROUP BY f.id, c.nome
             """,
             (cartao_id, usuario_id, ano_referencia, mes_referencia),
         ).fetchone()
@@ -265,12 +267,13 @@ def criar_compra(
             """
             INSERT INTO compras_cartao (
                 cartao_id, fatura_id, usuario_id, valor, descricao, categoria_id, data
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id
             """,
             (cartao_id, fatura_id, usuario_id, valor, descricao, categoria_id, data),
         )
+        compra_id = int(cursor.fetchone()[0])
         conn.commit()
-        return int(cursor.lastrowid)
+        return compra_id
     finally:
         conn.close()
 
@@ -324,13 +327,13 @@ def pagar_fatura_atomico(
 ) -> int:
     conn = get_connection()
     try:
-        conn.execute("BEGIN IMMEDIATE")
+        conn.lock_row("faturas", "id", fatura_id)
         fatura = conn.execute(
             "SELECT id FROM faturas WHERE id = ? AND usuario_id = ?",
             (fatura_id, usuario_id),
         ).fetchone()
         conta = conn.execute(
-            "SELECT id FROM contas WHERE id = ? AND usuario_id = ? AND ativo = 1",
+            "SELECT id FROM contas WHERE id = ? AND usuario_id = ? AND ativo = TRUE",
             (conta_id, usuario_id),
         ).fetchone()
         pagamento = conn.execute(
@@ -343,12 +346,13 @@ def pagar_fatura_atomico(
         cursor = conn.execute(
             """
             INSERT INTO pagamentos_fatura (fatura_id, conta_id, usuario_id, valor, data)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?) RETURNING id
             """,
             (fatura_id, conta_id, usuario_id, valor, data),
         )
+        pagamento_id = int(cursor.fetchone()[0])
         conn.commit()
-        return int(cursor.lastrowid)
+        return pagamento_id
     except Exception:
         conn.rollback()
         raise

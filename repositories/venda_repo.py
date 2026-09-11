@@ -6,9 +6,9 @@ def adicionar_venda(cliente: str, tipo: str, valor_total: float,
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO vendas (cliente, tipo, valor_total, comentario, data, usuario_id)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?) RETURNING id
     """, (cliente, tipo, valor_total, comentario, data, usuario_id))
-    venda_id = cursor.lastrowid
+    venda_id = int(cursor.fetchone()[0])
     conn.commit()
     conn.close()
     return venda_id

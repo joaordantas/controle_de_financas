@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from database.connection import get_connection
 
 
@@ -32,12 +34,13 @@ def criar_conta(nome: str, tipo: str, saldo_inicial: float, usuario_id: int) -> 
         cursor = conn.execute(
             """
             INSERT INTO contas (nome, tipo, saldo_inicial, usuario_id)
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, ?, ?) RETURNING id
             """,
             (nome, tipo, saldo_inicial, usuario_id),
         )
+        conta_id = int(cursor.fetchone()[0])
         conn.commit()
-        return int(cursor.lastrowid)
+        return conta_id
     finally:
         conn.close()
 
@@ -45,14 +48,14 @@ def criar_conta(nome: str, tipo: str, saldo_inicial: float, usuario_id: int) -> 
 def listar_contas_com_saldo(usuario_id: int, incluir_inativas: bool = False) -> list[tuple]:
     conn = get_connection()
     try:
-        filtro_ativo = "" if incluir_inativas else "AND c.ativo = 1"
+        filtro_ativo = "" if incluir_inativas else "AND c.ativo = TRUE"
         return conn.execute(
             f"""
             SELECT c.id, c.nome, c.tipo, c.saldo_inicial, c.ativo, c.principal,
                    {SALDO_ATUAL_SQL} AS saldo_atual
             FROM contas c
             WHERE c.usuario_id = ? {filtro_ativo}
-            ORDER BY c.ativo DESC, c.principal DESC, c.nome COLLATE NOCASE
+            ORDER BY c.ativo DESC, c.principal DESC, LOWER(c.nome)
             """,
             (usuario_id,),
         ).fetchall()
@@ -65,7 +68,7 @@ def buscar_conta_por_id(
 ) -> tuple | None:
     conn = get_connection()
     try:
-        filtro_ativo = "AND c.ativo = 1" if somente_ativa else ""
+        filtro_ativo = "AND c.ativo = TRUE" if somente_ativa else ""
         return conn.execute(
             f"""
             SELECT c.id, c.nome, c.tipo, c.saldo_inicial, c.ativo, c.principal,
@@ -108,10 +111,10 @@ def alterar_status_conta(conta_id: int, ativo: bool, usuario_id: int) -> bool:
         cursor = conn.execute(
             """
             UPDATE contas
-            SET ativo = ?, principal = CASE WHEN ? = 0 THEN 0 ELSE principal END
+            SET ativo = ?, principal = CASE WHEN ? = FALSE THEN FALSE ELSE principal END
             WHERE id = ? AND usuario_id = ?
             """,
-            (int(ativo), int(ativo), conta_id, usuario_id),
+            (ativo, ativo, conta_id, usuario_id),
         )
         conn.commit()
         return cursor.rowcount > 0
@@ -122,20 +125,20 @@ def alterar_status_conta(conta_id: int, ativo: bool, usuario_id: int) -> bool:
 def definir_conta_principal(conta_id: int, usuario_id: int) -> bool:
     conn = get_connection()
     try:
-        conn.execute("BEGIN IMMEDIATE")
+        conn.lock_row("usuarios", "id", usuario_id)
         conta = conn.execute(
-            "SELECT id FROM contas WHERE id = ? AND usuario_id = ? AND ativo = 1",
+            "SELECT id FROM contas WHERE id = ? AND usuario_id = ? AND ativo = TRUE",
             (conta_id, usuario_id),
         ).fetchone()
         if conta is None:
             conn.rollback()
             return False
         conn.execute(
-            "UPDATE contas SET principal = 0 WHERE usuario_id = ? AND principal = 1",
+            "UPDATE contas SET principal = FALSE WHERE usuario_id = ? AND principal = TRUE",
             (usuario_id,),
         )
         conn.execute(
-            "UPDATE contas SET principal = 1 WHERE id = ? AND usuario_id = ?",
+            "UPDATE contas SET principal = TRUE WHERE id = ? AND usuario_id = ?",
             (conta_id, usuario_id),
         )
         conn.commit()
@@ -150,35 +153,41 @@ def definir_conta_principal(conta_id: int, usuario_id: int) -> bool:
 def obter_uso_contas(usuario_id: int) -> dict[int, int]:
     conn = get_connection()
     try:
+        inicio_periodo = date.today() - timedelta(days=90)
         linhas = conn.execute(
             """
             WITH usos AS (
                 SELECT conta_id AS conta_id, COUNT(*) AS quantidade
                 FROM transacoes
                 WHERE usuario_id = ? AND conta_id IS NOT NULL
-                  AND date(data) >= date('now', '-90 days')
+                  AND data >= ?
                 GROUP BY conta_id
                 UNION ALL
                 SELECT conta_origem_id, COUNT(*)
                 FROM transferencias
-                WHERE usuario_id = ? AND date(data) >= date('now', '-90 days')
+                WHERE usuario_id = ? AND data >= ?
                 GROUP BY conta_origem_id
                 UNION ALL
                 SELECT conta_destino_id, COUNT(*)
                 FROM transferencias
-                WHERE usuario_id = ? AND date(data) >= date('now', '-90 days')
+                WHERE usuario_id = ? AND data >= ?
                 GROUP BY conta_destino_id
                 UNION ALL
                 SELECT conta_id, COUNT(*)
                 FROM pagamentos_fatura
-                WHERE usuario_id = ? AND date(data) >= date('now', '-90 days')
+                WHERE usuario_id = ? AND data >= ?
                 GROUP BY conta_id
             )
             SELECT conta_id, SUM(quantidade)
             FROM usos
             GROUP BY conta_id
             """,
-            (usuario_id, usuario_id, usuario_id, usuario_id),
+            (
+                usuario_id, inicio_periodo,
+                usuario_id, inicio_periodo,
+                usuario_id, inicio_periodo,
+                usuario_id, inicio_periodo,
+            ),
         ).fetchall()
         return {int(conta_id): int(quantidade) for conta_id, quantidade in linhas}
     finally:

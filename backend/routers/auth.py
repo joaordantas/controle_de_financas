@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from sqlite3 import IntegrityError
+from sqlalchemy.exc import IntegrityError
 
 from backend.schemas.auth import LoginRequest, RegisterRequest, UserResponse
 from services.auth_service import login, registrar

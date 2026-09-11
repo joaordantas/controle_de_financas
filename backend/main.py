@@ -10,9 +10,7 @@ from backend.routers.cards import router as cards_router
 from backend.routers.dashboard import router as dashboard_router
 from backend.routers.sales import router as sales_router
 from backend.routers.transactions import router as transactions_router
-from database.schema import criar_banco
-
-criar_banco()
+from database.connection import check_database_connection
 
 app = FastAPI(
     title="Controle de Financas API",
@@ -42,6 +40,7 @@ app.include_router(sales_router, prefix="/api")
 def health_check() -> dict:
     return {
         "message": "API do Controle de Financas online.",
+        "database": "online" if check_database_connection() else "indisponivel",
         "docs": "/docs",
     }
 

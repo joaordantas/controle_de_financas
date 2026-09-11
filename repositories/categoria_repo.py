@@ -5,11 +5,12 @@ def criar_categoria(nome: str, usuario_id: int) -> int:
     conn = get_connection()
     try:
         cursor = conn.execute(
-            "INSERT INTO categorias (nome, usuario_id) VALUES (?, ?)",
+            "INSERT INTO categorias (nome, usuario_id) VALUES (?, ?) RETURNING id",
             (nome, usuario_id),
         )
+        categoria_id = int(cursor.fetchone()[0])
         conn.commit()
-        return int(cursor.lastrowid)
+        return categoria_id
     finally:
         conn.close()
 
@@ -21,7 +22,7 @@ def listar_categorias(usuario_id: int) -> list[tuple]:
             """
             SELECT id, nome FROM categorias
             WHERE usuario_id = ?
-            ORDER BY nome COLLATE NOCASE
+            ORDER BY LOWER(nome)
             """,
             (usuario_id,),
         ).fetchall()
@@ -51,7 +52,7 @@ def nome_categoria_existe(nome: str, usuario_id: int, ignorar_id: int | None = N
         return conn.execute(
             f"""
             SELECT 1 FROM categorias
-            WHERE nome = ? COLLATE NOCASE AND usuario_id = ? {filtro_id}
+            WHERE LOWER(nome) = LOWER(?) AND usuario_id = ? {filtro_id}
             LIMIT 1
             """,
             parametros,
