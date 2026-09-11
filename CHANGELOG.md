@@ -4,6 +4,15 @@ Todas as alterações importantes da Nivra serão documentadas neste arquivo. O 
 
 ## [Unreleased]
 
+### Added
+
+- acesso à saída da conta pelo menu mobile “Mais”, reutilizando o mesmo contexto de autenticação do desktop;
+- guia para a renomeação manual e segura do repositório GitHub e do projeto Vercel.
+
+### Changed
+
+- metadados públicos da API padronizados com a identidade Nivra.
+
 ### Planned
 
 - autenticação segura validada pelo backend;
@@ -43,5 +52,5 @@ Todas as alterações importantes da Nivra serão documentadas neste arquivo. O 
 - credenciais de banco permanecem exclusivamente no backend e em variáveis de ambiente;
 - a autenticação atual continua temporária e ainda não é adequada para armazenar dados financeiros críticos.
 
-[Unreleased]: https://github.com/joaordantas/controle_de_financas/compare/v0.1.0-alpha.1...HEAD
-[0.1.0-alpha.1]: https://github.com/joaordantas/controle_de_financas/releases/tag/v0.1.0-alpha.1
+[Unreleased]: https://github.com/joaordantas/nivra/compare/v0.1.0-alpha.1...HEAD
+[0.1.0-alpha.1]: https://github.com/joaordantas/nivra/releases/tag/v0.1.0-alpha.1

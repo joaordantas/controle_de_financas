@@ -15,7 +15,7 @@ from database.connection import check_database_connection
 app = FastAPI(
     title="Nivra API",
     version="0.1.0",
-    description="API do controle financeiro pessoal Nivra.",
+    description="API da Nivra, plataforma de controle financeiro pessoal.",
 )
 
 app.add_middleware(

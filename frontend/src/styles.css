@@ -636,6 +636,11 @@ input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px 
   .mobile-more-group .navigation-label { margin: 0 8px 6px; }
   .mobile-more-link { display: flex; min-height: 46px; align-items: center; gap: 13px; padding: 0 10px; border-radius: 10px; color: var(--text-secondary); font-size: 0.88rem; font-weight: 600; }
   .mobile-more-link:hover, .mobile-more-link.is-active { background: var(--primary-soft); color: var(--primary-strong); }
+  .mobile-account-section { display: grid; gap: 8px; padding-top: 18px; border-top: 1px solid var(--border); }
+  .mobile-account-section .navigation-label { margin: 0 8px 6px; }
+  .mobile-account-user { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 2px 10px 8px; }
+  .mobile-logout-button { display: flex; min-height: 46px; align-items: center; gap: 13px; padding: 0 10px; border: 0; border-radius: 10px; background: transparent; color: var(--danger); font-size: 0.88rem; font-weight: 600; text-align: left; }
+  .mobile-logout-button:hover { background: var(--danger-soft); }
   .main-content { padding: 26px 20px 40px; }
 }
 

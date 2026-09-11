@@ -96,6 +96,10 @@ Configure no ambiente desejado:
 
 O build integrado instala as dependências do frontend, gera o bundle Vite e publica o FastAPI pelo entrypoint `backend.main:app`. A migration deve ser aplicada de forma controlada antes do primeiro acesso ao banco de um ambiente novo.
 
+## Renomeação dos serviços externos
+
+A troca do nome público no GitHub e na Vercel é uma operação manual e separada do código. Consulte o [guia de renomeação externa](renomeacao-externa.md) antes de alterar qualquer serviço. O projeto Neon já usa o nome `nivra-db` e não precisa ser modificado.
+
 ## Convenções
 
 - regras financeiras ficam em services;

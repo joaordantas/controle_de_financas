@@ -1,10 +1,12 @@
-import { MoreHorizontal, Plus, X } from "lucide-react";
+import { LogOut, MoreHorizontal, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
+import { useAuth } from "../../app/providers";
 import { mobileMoreFinanceNavigation, mobileMoreSettingsNavigation, mobileNavigation } from "./navigation";
 
 export function MobileNavigation() {
+  const { logout, user } = useAuth();
   const location = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -68,6 +70,23 @@ export function MobileNavigation() {
                 );
               })}
             </nav>
+
+            <section aria-label="Conta" className="mobile-account-section">
+              <span className="navigation-label">Conta</span>
+              <div className="mobile-account-user">
+                <span aria-hidden="true" className="user-avatar">
+                  {user?.usuario.slice(0, 1).toUpperCase()}
+                </span>
+                <span className="user-details">
+                  <strong>{user?.usuario}</strong>
+                  <small>{user?.email}</small>
+                </span>
+              </div>
+              <button className="mobile-logout-button" onClick={logout} type="button">
+                <LogOut aria-hidden="true" size={19} />
+                <span>Sair da conta</span>
+              </button>
+            </section>
           </section>
         </>
       ) : null}
