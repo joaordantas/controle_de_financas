@@ -1,5 +1,7 @@
 # Relatório da Fase 3A — Conta principal, cartões e faturas
 
+> **Documento histórico.** As funcionalidades descritas permanecem válidas, mas a persistência oficial agora usa PostgreSQL no Neon. Consulte o [relatório da migração](relatorio-migracao-postgresql.md) para a infraestrutura atual.
+
 Data de conclusão: 11 de setembro de 2026.
 
 ## Situação das fases

@@ -55,7 +55,7 @@ const router = createBrowserRouter([
       },
       {
         path: "assistant",
-        element: <ComingSoonPage description="O assistente será conectado somente depois que os serviços financeiros estiverem prontos." title="Assistente" />,
+        element: <ComingSoonPage description="A assistente financeira da Nivra está planejada e será conectada depois do motor de insights." title="Lumi" />,
       },
       { path: "settings", element: <SettingsPage /> },
       { path: "settings/categories", element: <CategoriesPage /> },

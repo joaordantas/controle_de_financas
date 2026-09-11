@@ -29,8 +29,8 @@ export function Sidebar() {
           <ProductIcon aria-hidden="true" size={23} strokeWidth={2} />
         </span>
         <span>
-          <strong>Finanças</strong>
-          <small>Seu dinheiro, mais simples</small>
+          <strong>Nivra</strong>
+          <small>Seu dinheiro, mais claro</small>
         </span>
       </div>
 

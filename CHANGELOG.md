@@ -1,0 +1,47 @@
+# Changelog
+
+Todas as alterações importantes da Nivra serão documentadas neste arquivo. O formato segue os princípios do [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adota [Versionamento Semântico](https://semver.org/lang/pt-BR/) durante sua evolução pré-1.0.
+
+## [Unreleased]
+
+### Planned
+
+- autenticação segura validada pelo backend;
+- parcelamentos e recorrências pessoais;
+- orçamentos e metas financeiras;
+- motor determinístico de insights e área “Sua atenção”;
+- Lumi, a assistente financeira da Nivra;
+- notificações internas, resumos e WhatsApp.
+
+## [0.1.0-alpha.1] - 2026-09-11
+
+> Release notes preparadas para revisão. A tag e a GitHub Release ainda não foram publicadas.
+
+### Added
+
+- interface React e TypeScript com rotas, componentes reutilizáveis e layout responsivo;
+- temas claro e escuro;
+- backend FastAPI organizado em routers, schemas, services e repositories;
+- dashboard com saldo, entradas, gastos e movimentações recentes;
+- contas financeiras, saldo calculado e conta principal;
+- receitas, despesas e transferências neutras no resumo financeiro;
+- categorias, histórico unificado, busca, filtros, criação, edição e exclusão;
+- cartões, compras, ciclos de fatura, histórico e pagamento integral;
+- PostgreSQL persistente no Neon por SQLAlchemy Core e Psycopg;
+- migrations versionadas com Alembic;
+- importador seguro e auditável para o SQLite legado;
+- configuração integrada de frontend e API para deploy na Vercel;
+- testes de regras financeiras, endpoints e isolamento lógico entre usuários.
+
+### Changed
+
+- PostgreSQL substituiu o SQLite como armazenamento oficial da aplicação;
+- a identidade pública do produto passou a ser Nivra.
+
+### Security
+
+- credenciais de banco permanecem exclusivamente no backend e em variáveis de ambiente;
+- a autenticação atual continua temporária e ainda não é adequada para armazenar dados financeiros críticos.
+
+[Unreleased]: https://github.com/joaordantas/controle_de_financas/compare/v0.1.0-alpha.1...HEAD
+[0.1.0-alpha.1]: https://github.com/joaordantas/controle_de_financas/releases/tag/v0.1.0-alpha.1

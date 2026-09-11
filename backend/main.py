@@ -13,9 +13,9 @@ from backend.routers.transactions import router as transactions_router
 from database.connection import check_database_connection
 
 app = FastAPI(
-    title="Controle de Financas API",
+    title="Nivra API",
     version="0.1.0",
-    description="API do assistente financeiro pessoal.",
+    description="API do controle financeiro pessoal Nivra.",
 )
 
 app.add_middleware(
@@ -39,7 +39,7 @@ app.include_router(sales_router, prefix="/api")
 @app.get("/api/health", include_in_schema=False)
 def health_check() -> dict:
     return {
-        "message": "API do Controle de Financas online.",
+        "message": "API da Nivra online.",
         "database": "online" if check_database_connection() else "indisponivel",
         "docs": "/docs",
     }

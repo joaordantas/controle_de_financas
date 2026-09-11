@@ -1,5 +1,7 @@
 # Relatório das Fases 1 e 2
 
+> **Documento histórico.** Este relatório registra o estado das fases em 10 de setembro de 2026. Desde então, PostgreSQL no Neon substituiu o SQLite como banco oficial. Consulte o [relatório da migração](relatorio-migracao-postgresql.md) para o estado atual.
+
 Data de consolidação: 10 de setembro de 2026
 
 ## Situação do produto

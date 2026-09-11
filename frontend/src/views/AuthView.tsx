@@ -64,7 +64,7 @@ export function AuthView({ onLogin }: AuthViewProps) {
       <section className="auth-intro">
         <div className="product-brand auth-brand">
           <span className="product-mark"><PiggyBank aria-hidden="true" size={23} /></span>
-          <span><strong>Finanças</strong><small>Seu dinheiro, mais simples</small></span>
+          <span><strong>Nivra</strong><small>Seu dinheiro, mais claro</small></span>
         </div>
         <div className="auth-copy">
           <span className="auth-kicker"><Sparkles size={16} /> Clareza sem complicação</span>
@@ -76,7 +76,7 @@ export function AuthView({ onLogin }: AuthViewProps) {
             <span><ShieldCheck size={18} /> Uma visão organizada para o seu dia a dia</span>
           </div>
         </div>
-        <small className="auth-version">Controle financeiro pessoal</small>
+        <small className="auth-version">Nivra · Alpha</small>
       </section>
 
       <section className="auth-form-panel">

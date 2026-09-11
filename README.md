@@ -1,45 +1,172 @@
-# Controle de Finanças
+<div align="center">
 
-Assistente financeiro pessoal com frontend React/TypeScript, API FastAPI e PostgreSQL. A aplicação é hospedada na Vercel e usa atualmente o Neon como provedor de banco persistente.
+# NIVRA
 
-## Estado do projeto
+**Controle financeiro inteligente, simples e automatizado.**
 
-As Fases 1 e 2 entregaram a fundação visual responsiva e o núcleo de finanças pessoais: autenticação inicial, contas, saldos, receitas, despesas, transferências, categorias, histórico, busca e filtros. A Fase 3A já existente permanece preservada, mas está pausada enquanto a infraestrutura PostgreSQL é estabilizada.
+A Nivra está sendo desenvolvida para tornar o controle financeiro mais rápido, claro e progressivamente automatizado.
 
-O SQLite em `storage/banco.db` é somente uma cópia legada para importação. Ele não é mais aberto pelo backend e nunca deve ser usado como persistência na Vercel.
+[![Status](https://img.shields.io/badge/status-alpha-6D5DFB)](#status-do-projeto)
+[![React](https://img.shields.io/badge/React-18-20232A?logo=react&logoColor=61DAFB)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-persistente-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Neon](https://img.shields.io/badge/Neon-database-00E599?logo=neon&logoColor=black)](https://neon.tech/)
+[![Vercel](https://img.shields.io/badge/Vercel-deploy-000000?logo=vercel&logoColor=white)](https://vercel.com/)
+
+[Roadmap](docs/roadmap.md) · [Arquitetura](docs/architecture.md) · [Desenvolvimento](docs/development.md) · [Release notes](docs/releases/v0.1.0-alpha.1.md) · [Releases](https://github.com/joaordantas/controle_de_financas/releases)
+
+</div>
+
+## Sobre a Nivra
+
+A Nivra é uma plataforma de finanças pessoais em evolução. Seu objetivo é reduzir o tempo gasto organizando movimentações, consultando saldos e tentando descobrir o que merece atenção.
+
+O produto parte de um núcleo financeiro funcional e avança gradualmente para automação, insights e orientação em linguagem natural. A proposta é oferecer mais contexto e clareza sem transformar a rotina financeira em trabalho manual constante.
+
+> **Seu dinheiro. Mais claro. Menos trabalho.**
+
+## Filosofia do produto
+
+- menos trabalho manual, cliques e digitação;
+- informações importantes fáceis de encontrar;
+- contexto para entender receitas, gastos e saldos;
+- automação introduzida de forma gradual e verificável;
+- alertas úteis no momento certo;
+- regras financeiras centralizadas e previsíveis.
+
+## O que já funciona
+
+### Finanças pessoais
+
+- Dashboard com saldo, entradas, gastos e movimentações recentes;
+- contas financeiras com saldo inicial e saldo calculado;
+- definição de conta principal;
+- receitas e despesas vinculadas a contas e categorias;
+- transferências entre contas, neutras no cálculo de receitas e despesas;
+- histórico unificado de movimentações;
+- busca e filtros por tipo, conta, categoria e período;
+- criação, edição e exclusão com recálculo dos saldos;
+- categorias gerenciadas nas configurações e durante o registro;
+- cartões, compras, ciclos de fatura, histórico e pagamento integral;
+- interface responsiva para desktop e dispositivos móveis;
+- temas claro e escuro.
+
+### Plataforma
+
+- frontend React, TypeScript e Vite;
+- rotas reais com React Router;
+- API REST em FastAPI;
+- separação entre routers, schemas, services e repositories;
+- PostgreSQL persistente no Neon;
+- acesso ao banco por SQLAlchemy Core e Psycopg;
+- migrations versionadas com Alembic;
+- configuração de deploy integrado na Vercel;
+- testes de regras financeiras, API e isolamento lógico entre usuários.
+
+## Demonstração e screenshots
+
+A aplicação já possui telas funcionais, mas as capturas públicas ainda não foram preparadas. A estrutura em [`docs/assets/screenshots`](docs/assets/screenshots/README.md) está reservada para imagens revisadas e sem dados pessoais.
+
+| Tela | Captura pública |
+| --- | --- |
+| Dashboard | Pendente |
+| Transações | Pendente |
+| Contas | Pendente |
+| Cartões e faturas | Pendente |
+| Experiência mobile | Pendente |
+
+A URL pública da aplicação será adicionada quando o endereço oficial da Vercel for confirmado no repositório.
+
+## ✦ Lumi — em desenvolvimento
+
+**Lumi** será a assistente financeira inteligente da Nivra. Ela está planejada para aplicar linguagem natural aos services financeiros existentes, oferecendo consultas e ações com confirmação.
+
+Exemplos planejados:
+
+```text
+Quanto gastei com alimentação este mês?
+Estou gastando mais que no mês passado?
+Registre R$ 42,90 de iFood.
+Quanto da minha próxima fatura já está comprometido?
+Posso gastar R$ 300 este final de semana?
+```
+
+Lumi ainda não está implementada. O motor determinístico de insights, o contexto financeiro e as operações seguras serão construídos antes da integração com IA.
 
 ## Arquitetura
 
 ```text
-React na Vercel
-       ↓ /api
-FastAPI na Vercel
-       ↓
-Services → Repositories → SQLAlchemy → PostgreSQL/Neon
+                 Nivra
+                   │
+          React + TypeScript
+                   │
+                REST /api
+                   │
+                FastAPI
+                   │
+                Services
+                   │
+              Repositories
+                   │
+           SQLAlchemy Core
+                   │
+          PostgreSQL / Neon
 ```
 
-O frontend não recebe credenciais do banco. O backend mantém a divisão entre routers, schemas, services, repositories e database.
+- **Frontend:** apresenta os dados, formulários, estados e navegação.
+- **Routers:** expõem os contratos HTTP e convertem erros de aplicação.
+- **Schemas:** validam entradas e respostas da API.
+- **Services:** concentram regras financeiras, validações e propriedade dos dados.
+- **Repositories:** executam consultas e persistência.
+- **Database:** gerencia conexão, modelos de schema e migrations.
 
-## Variáveis de ambiente
+Detalhes estão em [Arquitetura](docs/architecture.md).
 
-Use `.env.example` como referência e defina as variáveis no terminal, na IDE ou no provedor de hospedagem:
+## Tecnologias
 
-```env
-APP_ENV=development
-DATABASE_URL=postgresql://usuario:senha@ep-exemplo-pooler.regiao.aws.neon.tech/neondb?sslmode=require
-DATABASE_URL_UNPOOLED=postgresql://usuario:senha@ep-exemplo.regiao.aws.neon.tech/neondb?sslmode=require
-```
+| Camada | Tecnologias |
+| --- | --- |
+| Interface | React 18, TypeScript, Vite, React Router, Lucide React |
+| API | Python 3.12, FastAPI, Pydantic |
+| Persistência | PostgreSQL, Neon, SQLAlchemy Core, Psycopg 3 |
+| Schema | Alembic |
+| Hospedagem | Vercel |
+| Testes | unittest, FastAPI TestClient, banco isolado |
 
-- `DATABASE_URL`: conexão com pooling usada pela aplicação. No Neon, prefira o host com `-pooler` para o ambiente serverless.
-- `DATABASE_URL_UNPOOLED`: conexão direta usada por Alembic e pelo importador. É recomendada, mas o sistema usa `DATABASE_URL` se ela não existir.
-- `APP_ENV`: use `development` localmente e `production` na Vercel.
-- `TEST_DATABASE_URL`: banco exclusivo dos testes. A suíte recusa reutilizar `DATABASE_URL`.
+## Roadmap
 
-Nenhuma dessas variáveis pode começar com `VITE_`, pois isso a exporia no bundle do navegador.
+| Marco | Situação |
+| --- | --- |
+| Fundação React e interface responsiva | Concluído |
+| Núcleo de contas e movimentações | Concluído |
+| PostgreSQL persistente e migrations | Concluído |
+| Conta principal, cartões e faturas | Disponível em Alpha |
+| Parcelamentos e recorrências | Planejado |
+| Orçamentos e metas | Planejado |
+| Insights financeiros | Planejado |
+| Lumi | Em desenvolvimento conceitual |
+| Notificações e WhatsApp | Planejado |
 
-## Instalação e desenvolvimento
+Consulte o [roadmap público](docs/roadmap.md) para todos os marcos.
 
-Use Python 3.12, instale as dependências e configure as variáveis antes de iniciar a API:
+## Status do projeto
+
+> [!WARNING]
+> A Nivra está em **Alpha**. Autenticação, segurança e funcionalidades financeiras ainda estão em evolução. Esta versão não é recomendada para armazenar informações financeiras críticas ou credenciais de uso real.
+
+O backend já valida a propriedade lógica de contas, categorias e movimentações. A autenticação atual ainda mantém a identificação do usuário no `localStorage` e envia `usuario_id` para a API. Sessões seguras no backend continuam como requisito antes de uma versão estável.
+
+## Instalação local
+
+Requisitos:
+
+- Python 3.12;
+- Node.js e npm;
+- banco PostgreSQL acessível;
+- variáveis de ambiente configuradas.
+
+Backend:
 
 ```bash
 python -m venv .venv
@@ -48,9 +175,7 @@ alembic upgrade head
 uvicorn backend.main:app --reload
 ```
 
-A documentação da API fica em `http://127.0.0.1:8000/docs`. O endpoint `/api/health` também verifica a conexão com o banco.
-
-Para executar o frontend:
+Frontend:
 
 ```bash
 cd frontend
@@ -58,92 +183,57 @@ npm ci
 npm run dev
 ```
 
-O frontend usa `http://127.0.0.1:8000/api` no desenvolvimento. Para trocar a origem da API, defina apenas uma URL pública em `frontend/.env`:
+Por padrão, o frontend local acessa `http://127.0.0.1:8000/api`. A documentação OpenAPI fica em `http://127.0.0.1:8000/docs`.
 
-```env
-VITE_API_URL=http://127.0.0.1:8000
-```
+O guia completo está em [Desenvolvimento local](docs/development.md).
 
-## Migrations
+## Configuração
 
-O schema é controlado pelo Alembic. A API não cria nem altera tabelas durante o startup.
+Use [`.env.example`](.env.example) apenas como referência. Credenciais reais devem permanecer no ambiente local ou no provedor de hospedagem.
 
-```bash
-alembic upgrade head
-alembic current
-alembic revision --autogenerate -m "descricao da alteracao"
-```
+| Variável | Uso |
+| --- | --- |
+| `APP_ENV` | Identifica desenvolvimento, teste ou produção |
+| `DATABASE_URL` | Conexão PostgreSQL usada pela aplicação |
+| `DATABASE_URL_UNPOOLED` | Conexão direta para migrations e importação |
+| `TEST_DATABASE_URL` | Banco isolado e descartável para testes |
+| `VITE_API_URL` | Origem pública da API, quando frontend e backend não compartilham domínio |
 
-Execute migrations de produção de forma controlada com `DATABASE_URL_UNPOOLED`. Não coloque `alembic upgrade head` no startup da função serverless.
+Variáveis que contêm credenciais de banco nunca devem usar o prefixo `VITE_`.
 
-## Migrar o SQLite antigo
+## Banco de dados
 
-O importador preserva IDs e relacionamentos, grava tudo em uma única transação e nunca apaga o arquivo original.
+PostgreSQL é o armazenamento oficial, atualmente fornecido pelo Neon. O SQLite foi usado no desenvolvimento inicial e permanece apenas como fonte legada de migração e banco isolado em testes.
 
-Primeiro analise a origem, sem escrever no PostgreSQL:
+O schema é aplicado com Alembic e não é recriado durante o startup da API. Consulte o [relatório da migração PostgreSQL](docs/relatorio-migracao-postgresql.md) para decisões, validações e procedimento do importador legado.
 
-```bash
-python scripts/migrate_sqlite_to_postgres.py
-```
+## Deploy
 
-Para autorizar exclusivamente os três registros órfãos já auditados a ficarem fora do PostgreSQL:
+O repositório está preparado para compilar o frontend Vite e publicar a API FastAPI na Vercel. Em produção, a função recebe as conexões PostgreSQL por variáveis de ambiente e não depende do filesystem para persistência.
 
-```bash
-python scripts/migrate_sqlite_to_postgres.py --skip-known-orphans
-```
+Antes do primeiro deploy de um ambiente novo:
 
-O comando continua sendo um dry-run. Ele confere o conteúdo completo dos três registros e bloqueia qualquer órfão novo. Depois de revisar o relatório e aplicar as migrations no PostgreSQL, execute a importação uma única vez:
+1. configure `DATABASE_URL`, `DATABASE_URL_UNPOOLED` e `APP_ENV` na Vercel;
+2. aplique `alembic upgrade head` ao banco correspondente;
+3. publique o commit desejado;
+4. confirme `/api/health`, cadastro, login e persistência após um novo deploy.
 
-```bash
-python scripts/migrate_sqlite_to_postgres.py --execute --skip-known-orphans
-```
+## Segurança e limitações
 
-Por segurança, o importador recusa um destino que já contenha dados. Para retomar uma importação conhecida, `--allow-existing` ignora apenas IDs já presentes e mantém as demais constraints ativas:
+- autenticação segura com sessão ou cookie HTTP-only ainda está planejada;
+- o isolamento atual depende de validações de propriedade nos services;
+- filtros são processados no frontend e ainda não possuem paginação no backend;
+- Lumi, insights automáticos e notificações ainda não estão disponíveis;
+- a aplicação permanece em Alpha e não deve receber dados financeiros críticos.
 
-```bash
-python scripts/migrate_sqlite_to_postgres.py --execute --skip-known-orphans --allow-existing
-```
+Nenhuma credencial PostgreSQL é enviada ao React. O fluxo permanece navegador → FastAPI → PostgreSQL.
 
-O dry-run atual identifica três registros financeiros órfãos no banco legado: duas transações pertencentes a usuários removidos (`usuario_id` 1 e 2) e uma venda ligada ao usuário removido 1. A opção explícita mantém esses registros somente no SQLite original. O arquivo não é alterado.
+## Releases e versionamento
 
-## Testes
+A primeira release pública está preparada como **`v0.1.0-alpha.1` — Core Finance**, mas ainda não foi publicada. Consulte as [release notes](docs/releases/v0.1.0-alpha.1.md) e o [changelog](CHANGELOG.md).
 
-```bash
-python -m unittest discover -s tests -v
-cd frontend
-npm run build
-```
+O projeto usará versões pré-1.0 enquanto autenticação, planejamento, inteligência e automação amadurecem. Nenhuma fase interna corresponde diretamente a uma versão pública.
 
-Os testes definem `APP_ENV=test`, usam um SQLite descartável criado pelas migrations e jamais selecionam `DATABASE_URL` automaticamente. Para uma suíte futura contra PostgreSQL, configure um `TEST_DATABASE_URL` separado e descartável; nunca use o projeto de produção do Neon.
+## Autor
 
-## Configuração na Vercel
-
-Mantenha o diretório raiz do repositório como Root Directory. Nas configurações do projeto, cadastre para Production, Preview e Development conforme necessário:
-
-```text
-APP_ENV=production
-DATABASE_URL=<URL pooled do Neon>
-DATABASE_URL_UNPOOLED=<URL direta do Neon>
-```
-
-Antes do primeiro deploy, rode `alembic upgrade head` usando a URL direta. Depois, importe o SQLite uma única vez se os dados legados forem necessários. A configuração exclui `storage/**` da função, portanto a produção não depende de arquivos locais.
-
-## Verificação de persistência
-
-1. Crie um usuário de teste no site publicado.
-2. Crie uma conta, uma categoria, uma receita, uma despesa e uma transferência.
-3. Confirme os saldos e o histórico.
-4. Faça um novo deploy sem alterar o banco Neon.
-5. Entre novamente e confirme que todos os registros permanecem.
-6. Crie um segundo usuário e confirme que as listas de contas, categorias e movimentações não exibem dados do primeiro.
-
-A autenticação atual ainda guarda a identificação do usuário no `localStorage` e envia `usuario_id` à API. Os services validam a propriedade dos dados, mas sessão segura com cookie HTTP-only continua como etapa obrigatória antes do uso com dados sensíveis.
-
-## Guias do projeto
-
-- `docs/trilha-estudos.md`
-- `docs/anotacoes-projeto.md`
-- `docs/comandos-uteis.md`
-- `docs/relatorio-fases-1-e-2.md`
-- `docs/relatorio-fase-3a.md`
-- `docs/relatorio-migracao-postgresql.md`
+Desenvolvido por **João Dantas** — [@joaordantas](https://github.com/joaordantas).

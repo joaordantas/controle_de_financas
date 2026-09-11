@@ -1,7 +1,7 @@
 [project]
 name = "controle-de-financas"
 version = "0.2.0"
-description = "Assistente financeiro pessoal com FastAPI e React."
+description = "Nivra — controle financeiro inteligente, simples e automatizado."
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "bcrypt",
