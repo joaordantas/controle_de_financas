@@ -22,6 +22,8 @@ Defina as variáveis descritas em `.env.example` no seu terminal ou na configura
 APP_ENV=development
 DATABASE_URL=<conexao PostgreSQL da aplicacao>
 DATABASE_URL_UNPOOLED=<conexao direta para migrations>
+SESSION_TTL_HOURS=168
+CORS_ORIGINS=
 ```
 
 Aplique o schema e inicie a API:
@@ -45,7 +47,9 @@ npm ci
 npm run dev
 ```
 
-O Vite inicia normalmente em `http://127.0.0.1:5173`. Quando necessário, `VITE_API_URL` deve conter somente a origem pública da API.
+O Vite inicia normalmente em `http://127.0.0.1:5173`. Quando necessário, `VITE_API_URL` deve conter somente a origem pública da API. Use o mesmo nome de host no frontend e backend durante o desenvolvimento (`127.0.0.1` nos dois, por exemplo) para manter o comportamento de cookies consistente.
+
+O frontend usa `credentials: include`. A sessão fica em cookie HTTP-only, e operações de escrita obtêm automaticamente um token CSRF pelo endpoint `/api/auth/csrf`.
 
 ## Testes
 
@@ -92,7 +96,11 @@ Configure no ambiente desejado:
 
 - `APP_ENV`;
 - `DATABASE_URL`;
-- `DATABASE_URL_UNPOOLED`.
+- `DATABASE_URL_UNPOOLED`;
+- `SESSION_TTL_HOURS` quando o prazo padrão de 7 dias não for adequado;
+- `CORS_ORIGINS` apenas quando existir um frontend confiável em outra origem.
+
+Em produção, configure `APP_ENV=production`. A Vercel também informa `VERCEL_ENV=production`, usado como proteção adicional para ativar o atributo `Secure` do cookie.
 
 O build integrado instala as dependências do frontend, gera o bundle Vite e publica o FastAPI pelo entrypoint `backend.main:app`. A migration deve ser aplicada de forma controlada antes do primeiro acesso ao banco de um ambiente novo.
 

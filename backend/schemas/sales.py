@@ -1,15 +1,15 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SaleCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     cliente: str = Field(min_length=1, max_length=100)
     tipo: str = Field(min_length=1, max_length=50)
     valor_total: float = Field(gt=0)
     comentario: str | None = Field(default=None, max_length=255)
     data: str
-    usuario_id: int = Field(ge=1)
 
 
 class SaleResponse(BaseModel):
@@ -22,12 +22,12 @@ class SaleResponse(BaseModel):
 
 
 class InstallmentCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     venda_id: int = Field(ge=1)
     quantidade: int = Field(gt=0)
     valor: float = Field(gt=0)
     status: Literal["pendente", "pago"]
     data: str
-    usuario_id: int = Field(ge=1)
 
 
 class InstallmentItem(BaseModel):

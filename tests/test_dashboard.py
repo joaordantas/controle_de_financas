@@ -8,6 +8,7 @@ from services.cartao_service import criar_cartao_service, criar_compra_service
 from services.categoria_service import criar_categoria_service
 from services.conta_service import criar_conta_service
 from services.transacao_service import criar_transacao_service
+from tests.auth_support import authenticate_existing_user
 from tests.db_support import remove_test_database, reset_test_database
 
 
@@ -24,22 +25,23 @@ class DashboardApiTests(unittest.TestCase):
         conn.commit()
         conn.close()
         self.client = TestClient(app)
+        authenticate_existing_user(self.client, 1)
 
     def tearDown(self):
         self.client.close()
         remove_test_database()
 
-    def get_profit(self, usuario_id: int, inicio: str, fim: str):
+    def get_profit(self, inicio: str, fim: str):
         return self.client.get(
             "/api/dashboard/profit",
-            params={"usuario_id": usuario_id, "data_inicio": inicio, "data_fim": fim},
+            params={"data_inicio": inicio, "data_fim": fim},
         )
 
     def test_usuario_com_conta_e_sem_movimentacoes_retorna_zeros(self):
         criar_conta_service("Nubank", "digital", 7.22, 1)
 
-        profit = self.get_profit(1, "2026-09-01", "2026-09-30")
-        accounts = self.client.get("/api/accounts", params={"usuario_id": 1})
+        profit = self.get_profit("2026-09-01", "2026-09-30")
+        accounts = self.client.get("/api/accounts")
 
         self.assertEqual(profit.status_code, 200, profit.text)
         self.assertEqual(profit.json(), {"entrada": 0.0, "saida": 0.0, "lucro": 0.0})
@@ -58,7 +60,7 @@ class DashboardApiTests(unittest.TestCase):
         conta_outro = criar_conta_service("Conta externa", "digital", 0, 2)
         criar_transacao_service(999, "entrada", None, "Outro usuario", "2026-09-05", 2, conta_outro["id"])
 
-        response = self.get_profit(1, "2026-09-01", "2026-09-11")
+        response = self.get_profit("2026-09-01", "2026-09-11")
 
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(response.json(), {"entrada": 1000.0, "saida": 150.0, "lucro": 850.0})
@@ -67,8 +69,13 @@ class DashboardApiTests(unittest.TestCase):
         conta_outro = criar_conta_service("Conta externa", "digital", 0, 2)
         criar_transacao_service(300, "entrada", None, "Outro usuario", "2026-09-05", 2, conta_outro["id"])
 
-        vazio = self.get_profit(1, "2026-10-01", "2026-10-31")
-        outro_usuario = self.get_profit(2, "2026-09-01", "2026-09-30")
+        vazio = self.get_profit("2026-10-01", "2026-10-31")
+        with TestClient(app) as client_outro:
+            authenticate_existing_user(client_outro, 2)
+            outro_usuario = client_outro.get(
+                "/api/dashboard/profit",
+                params={"data_inicio": "2026-09-01", "data_fim": "2026-09-30"},
+            )
 
         self.assertEqual(vazio.status_code, 200, vazio.text)
         self.assertEqual(vazio.json(), {"entrada": 0.0, "saida": 0.0, "lucro": 0.0})

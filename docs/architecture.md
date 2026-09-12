@@ -30,7 +30,7 @@ O diretório `frontend/` contém a interface React, navegação, formulários, f
 
 ### Routers
 
-`backend/routers/` define os endpoints sob `/api`, recebe schemas validados e converte resultados ou erros para respostas HTTP. Routers devem permanecer pequenos.
+`backend/routers/` define os endpoints sob `/api`, recebe schemas validados e converte resultados ou erros para respostas HTTP. Uma dependência compartilhada autentica a sessão e entrega o usuário atual às rotas protegidas. Routers devem permanecer pequenos.
 
 ### Schemas
 
@@ -58,9 +58,13 @@ A API não cria tabelas no startup e não depende de arquivos locais para persis
 
 Operações críticas utilizam transações. A troca de conta principal serializa alterações concorrentes, pagamentos de fatura bloqueiam a linha correspondente e uma transferência é persistida como um único evento entre contas.
 
-## Segurança atual
+## Autenticação e isolamento
 
-Os services verificam se contas, categorias, transações, transferências e cartões pertencem ao `usuario_id` informado. A autenticação ainda é temporária e deve evoluir para identidade validada no backend antes da versão estável.
+O login cria uma sessão persistente no PostgreSQL. O navegador recebe um identificador aleatório em cookie HTTP-only; o banco guarda somente seu hash. Em produção, o cookie usa `Secure` e `SameSite=Lax`. A sessão possui prazo de expiração configurável e o logout a revoga no servidor.
+
+O frontend não envia `usuario_id` nas APIs protegidas. O FastAPI resolve `current_user` a partir da sessão, as rotas repassam essa identidade e os services verificam a propriedade de contas, categorias, transações, transferências, cartões e demais entidades privadas. Requisições de alteração também exigem um token CSRF vinculado à sessão.
+
+Recuperação de senha, rate limiting e histórico de dispositivos permanecem no roadmap de segurança.
 
 ## Evolução planejada
 

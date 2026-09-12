@@ -62,7 +62,10 @@ O produto parte de um núcleo financeiro funcional e avança gradualmente para a
 - acesso ao banco por SQLAlchemy Core e Psycopg;
 - migrations versionadas com Alembic;
 - configuração de deploy integrado na Vercel;
-- testes de regras financeiras, API e isolamento lógico entre usuários.
+- sessões persistentes no PostgreSQL com cookie HTTP-only;
+- proteção CSRF nas operações de escrita;
+- identidade do usuário determinada pelo backend;
+- testes de regras financeiras, API, falsificação de identidade e isolamento entre usuários.
 
 ## Demonstração e screenshots
 
@@ -142,8 +145,10 @@ Detalhes estão em [Arquitetura](docs/architecture.md).
 | Núcleo de contas e movimentações | Concluído |
 | PostgreSQL persistente e migrations | Concluído |
 | Conta principal, cartões e faturas | Disponível em Alpha |
+| Autenticação segura por sessão | Concluído |
 | Parcelamentos e recorrências | Planejado |
 | Orçamentos e metas | Planejado |
+| Open Finance | Planejado |
 | Insights financeiros | Planejado |
 | Lumi | Em desenvolvimento conceitual |
 | Notificações e WhatsApp | Planejado |
@@ -153,9 +158,9 @@ Consulte o [roadmap público](docs/roadmap.md) para todos os marcos.
 ## Status do projeto
 
 > [!WARNING]
-> A Nivra está em **Alpha**. Autenticação, segurança e funcionalidades financeiras ainda estão em evolução. Esta versão não é recomendada para armazenar informações financeiras críticas ou credenciais de uso real.
+> A Nivra está em **Alpha**. Embora a identidade já seja validada por sessão segura no backend, outras camadas de segurança, operação e funcionalidades financeiras ainda estão em evolução. Esta versão não é recomendada para armazenar informações financeiras críticas.
 
-O backend já valida a propriedade lógica de contas, categorias e movimentações. A autenticação atual ainda mantém a identificação do usuário no `localStorage` e envia `usuario_id` para a API. Sessões seguras no backend continuam como requisito antes de uma versão estável.
+O backend identifica o usuário pelo cookie HTTP-only, consulta a sessão persistida no PostgreSQL e injeta essa identidade nas rotas protegidas. O React não escolhe nem envia `usuario_id`. Alterações exigem um token CSRF vinculado à sessão, e o logout revoga a sessão no servidor.
 
 ## Instalação local
 
@@ -197,6 +202,8 @@ Use [`.env.example`](.env.example) apenas como referência. Credenciais reais de
 | `DATABASE_URL` | Conexão PostgreSQL usada pela aplicação |
 | `DATABASE_URL_UNPOOLED` | Conexão direta para migrations e importação |
 | `TEST_DATABASE_URL` | Banco isolado e descartável para testes |
+| `SESSION_TTL_HOURS` | Prazo da sessão; o padrão é 168 horas |
+| `CORS_ORIGINS` | Origens adicionais confiáveis, separadas por vírgula |
 | `VITE_API_URL` | Origem pública da API, quando frontend e backend não compartilham domínio |
 
 Variáveis que contêm credenciais de banco nunca devem usar o prefixo `VITE_`.
@@ -213,15 +220,18 @@ O repositório está preparado para compilar o frontend Vite e publicar a API Fa
 
 Antes do primeiro deploy de um ambiente novo:
 
-1. configure `DATABASE_URL`, `DATABASE_URL_UNPOOLED` e `APP_ENV` na Vercel;
+1. configure `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `APP_ENV=production` e, se necessário, `CORS_ORIGINS` na Vercel;
 2. aplique `alembic upgrade head` ao banco correspondente;
 3. publique o commit desejado;
 4. confirme `/api/health`, cadastro, login e persistência após um novo deploy.
 
 ## Segurança e limitações
 
-- autenticação segura com sessão ou cookie HTTP-only ainda está planejada;
-- o isolamento atual depende de validações de propriedade nos services;
+- sessões ficam no PostgreSQL; somente o hash do token de sessão é armazenado;
+- o cookie da sessão é HTTP-only, SameSite Lax e Secure em produção;
+- operações de escrita exigem proteção CSRF vinculada à sessão;
+- a identidade vem do backend e a propriedade continua validada nos services;
+- recuperação e alteração de senha, histórico de sessões e rate limiting de login ainda estão planejados;
 - filtros são processados no frontend e ainda não possuem paginação no backend;
 - Lumi, insights automáticos e notificações ainda não estão disponíveis;
 - a aplicação permanece em Alpha e não deve receber dados financeiros críticos.

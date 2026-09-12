@@ -60,17 +60,17 @@ export function CardsPage() {
     try {
       setLoading(true);
       const [cardData, categoryData, accountData] = await Promise.all([
-        api.getCards(user.id, true),
-        api.getCategories(user.id),
-        api.getAccounts(user.id, true),
+        api.getCards(true),
+        api.getCategories(),
+        api.getAccounts(true),
       ]);
       const cardId = cardData.some((card) => card.id === preferredCardId)
         ? preferredCardId as number
         : cardData.some((card) => card.id === selectedCardId)
           ? selectedCardId
           : cardData[0]?.id ?? 0;
-      const invoiceData = cardId ? await api.getCardInvoices(cardId, user.id) : [];
-      const detail = detailId ? await api.getInvoice(detailId, user.id) : null;
+      const invoiceData = cardId ? await api.getCardInvoices(cardId) : [];
+      const detail = detailId ? await api.getInvoice(detailId) : null;
       setCards(cardData);
       setCategories(categoryData);
       setAccounts(accountData);
@@ -94,7 +94,7 @@ export function CardsPage() {
     if (!user) return;
     setSelectedCardId(cardId);
     try {
-      setInvoices(await api.getCardInvoices(cardId, user.id));
+      setInvoices(await api.getCardInvoices(cardId));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível carregar as faturas.");
     }
@@ -104,7 +104,7 @@ export function CardsPage() {
     if (!user) return;
     try {
       setSaving(true);
-      const created = await api.createCard({ usuario_id: user.id, nome: values.nome, limite_total: values.limiteTotal, dia_fechamento: values.diaFechamento, dia_vencimento: values.diaVencimento });
+      const created = await api.createCard({ nome: values.nome, limite_total: values.limiteTotal, dia_fechamento: values.diaFechamento, dia_vencimento: values.diaVencimento });
       setCardFormVersion((current) => current + 1);
       setMessage("Cartão adicionado com sucesso.");
       await load(created.id);
@@ -120,7 +120,7 @@ export function CardsPage() {
     if (!user || !editingCard) return;
     try {
       setSaving(true);
-      await api.updateCard(editingCard.id, { usuario_id: user.id, nome: values.nome, limite_total: values.limiteTotal, dia_fechamento: values.diaFechamento, dia_vencimento: values.diaVencimento });
+      await api.updateCard(editingCard.id, { nome: values.nome, limite_total: values.limiteTotal, dia_fechamento: values.diaFechamento, dia_vencimento: values.diaVencimento });
       setEditingCard(null);
       setMessage("Cartão atualizado. Os ciclos já criados foram preservados.");
       await load(editingCard.id, invoiceDetail?.id);
@@ -135,7 +135,7 @@ export function CardsPage() {
   async function toggleCard(card: Card) {
     if (!user || !window.confirm(`${card.ativo ? "Desativar" : "Reativar"} o cartão \"${card.nome}\"?`)) return;
     try {
-      await api.updateCardStatus(card.id, user.id, !card.ativo);
+      await api.updateCardStatus(card.id, !card.ativo);
       setMessage(card.ativo ? "Cartão desativado. O histórico foi mantido." : "Cartão reativado.");
       await load(card.id, invoiceDetail?.id);
     } catch (err) {
@@ -148,7 +148,7 @@ export function CardsPage() {
     if (!user) return;
     try {
       setSaving(true);
-      const purchase = await api.createCardPurchase({ usuario_id: user.id, cartao_id: values.cartaoId, valor: values.valor, descricao: values.descricao, categoria_id: values.categoriaId, data: values.data });
+      const purchase = await api.createCardPurchase({ cartao_id: values.cartaoId, valor: values.valor, descricao: values.descricao, categoria_id: values.categoriaId, data: values.data });
       setPurchaseFormVersion((current) => current + 1);
       setMessage("Compra adicionada à fatura correta.");
       await load(values.cartaoId, purchase.fatura_id);
@@ -164,7 +164,7 @@ export function CardsPage() {
     if (!user || !editingPurchase) return;
     try {
       setSaving(true);
-      const updated = await api.updateCardPurchase(editingPurchase.id, { usuario_id: user.id, cartao_id: values.cartaoId, valor: values.valor, descricao: values.descricao, categoria_id: values.categoriaId, data: values.data });
+      const updated = await api.updateCardPurchase(editingPurchase.id, { cartao_id: values.cartaoId, valor: values.valor, descricao: values.descricao, categoria_id: values.categoriaId, data: values.data });
       setEditingPurchase(null);
       setMessage("Compra atualizada e ciclo recalculado.");
       await load(updated.cartao_id, updated.fatura_id);
@@ -179,7 +179,7 @@ export function CardsPage() {
   async function deletePurchase(purchase: CardPurchase) {
     if (!user || !window.confirm(`Excluir a compra \"${purchase.descricao}\"?`)) return;
     try {
-      await api.deleteCardPurchase(purchase.id, user.id);
+      await api.deleteCardPurchase(purchase.id);
       setMessage("Compra excluída e limite recalculado.");
       await load(purchase.cartao_id, purchase.fatura_id);
     } catch (err) {
@@ -191,7 +191,7 @@ export function CardsPage() {
   async function openInvoice(invoiceId: number) {
     if (!user) return;
     try {
-      setInvoiceDetail(await api.getInvoice(invoiceId, user.id));
+      setInvoiceDetail(await api.getInvoice(invoiceId));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível abrir a fatura.");
     }
@@ -202,7 +202,7 @@ export function CardsPage() {
     if (!window.confirm(`Pagar ${formatCurrency(invoiceDetail.valor_total)} usando a conta selecionada?`)) return;
     try {
       setSaving(true);
-      await api.payInvoice(invoiceDetail.id, user.id, paymentAccountId, paymentDate);
+      await api.payInvoice(invoiceDetail.id, paymentAccountId, paymentDate);
       setMessage("Fatura paga. O saldo da conta e o limite foram atualizados.");
       await load(invoiceDetail.cartao_id, invoiceDetail.id);
     } catch (err) {

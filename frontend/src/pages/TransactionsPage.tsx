@@ -139,10 +139,10 @@ export function TransactionsPage() {
     try {
       setLoading(true);
       const [transactionData, transferData, categoryData, accountData] = await Promise.all([
-        api.getTransactions(user.id),
-        api.getTransfers(user.id),
-        api.getCategories(user.id),
-        api.getAccounts(user.id),
+        api.getTransactions(),
+        api.getTransfers(),
+        api.getCategories(),
+        api.getAccounts(),
       ]);
       setTransactions(transactionData);
       setTransfers(transferData);
@@ -166,7 +166,7 @@ export function TransactionsPage() {
 
   async function createCategory(name: string) {
     if (!user) throw new Error("Sessão inválida.");
-    const category = await api.createCategory(user.id, name);
+    const category = await api.createCategory(name);
     setCategories((current) => [...current, category].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")));
     return category;
   }
@@ -176,9 +176,9 @@ export function TransactionsPage() {
     try {
       setSaving(true);
       if (values.tipo === "transferencia") {
-        await api.createTransfer({ usuario_id: user.id, conta_origem_id: values.contaOrigemId, conta_destino_id: values.contaDestinoId, valor: values.valor, descricao: values.descricao, data: values.data });
+        await api.createTransfer({ conta_origem_id: values.contaOrigemId, conta_destino_id: values.contaDestinoId, valor: values.valor, descricao: values.descricao, data: values.data });
       } else {
-        await api.createTransaction({ usuario_id: user.id, valor: values.valor, tipo: values.tipo, categoria_id: values.categoriaId, comentario: values.descricao, data: values.data, conta_id: values.contaId });
+        await api.createTransaction({ valor: values.valor, tipo: values.tipo, categoria_id: values.categoriaId, comentario: values.descricao, data: values.data, conta_id: values.contaId });
       }
       setFormVersion((current) => current + 1);
       setMessage(values.tipo === "transferencia" ? "Transferência registrada sem alterar receitas e despesas." : "Movimentação adicionada com sucesso.");
@@ -197,9 +197,9 @@ export function TransactionsPage() {
     try {
       setSaving(true);
       if (editing.kind === "transfer") {
-        await api.updateTransfer(editing.id, { usuario_id: user.id, conta_origem_id: values.contaOrigemId, conta_destino_id: values.contaDestinoId, valor: values.valor, descricao: values.descricao, data: values.data });
+        await api.updateTransfer(editing.id, { conta_origem_id: values.contaOrigemId, conta_destino_id: values.contaDestinoId, valor: values.valor, descricao: values.descricao, data: values.data });
       } else if (values.tipo !== "transferencia") {
-        await api.updateTransaction(editing.id, { usuario_id: user.id, valor: values.valor, tipo: values.tipo, categoria_id: values.categoriaId, comentario: values.descricao, data: values.data, conta_id: values.contaId });
+        await api.updateTransaction(editing.id, { valor: values.valor, tipo: values.tipo, categoria_id: values.categoriaId, comentario: values.descricao, data: values.data, conta_id: values.contaId });
       }
       setEditing(null);
       setMessage("Movimentação atualizada com sucesso.");
@@ -216,8 +216,8 @@ export function TransactionsPage() {
   async function deleteMovement(movement: Movement) {
     if (!user || !window.confirm(`Excluir \"${movement.descricao || "movimentação"}\"?`)) return;
     try {
-      if (movement.kind === "transfer") await api.deleteTransfer(movement.id, user.id);
-      else await api.deleteTransaction(movement.id, user.id);
+      if (movement.kind === "transfer") await api.deleteTransfer(movement.id);
+      else await api.deleteTransaction(movement.id);
       setMessage("Movimentação excluída e saldos recalculados.");
       setError("");
       await load();

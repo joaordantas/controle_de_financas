@@ -14,12 +14,14 @@ import { AccountsPage } from "../pages/AccountsPage";
 import { useAuth } from "./providers";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return <div className="route-loading" role="status">Verificando sua sessão...</div>;
   return isAuthenticated ? children : <Navigate replace to="/login" />;
 }
 
 function PublicRoute({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return <div className="route-loading" role="status">Verificando sua sessão...</div>;
   return isAuthenticated ? <Navigate replace to="/dashboard" /> : children;
 }
 

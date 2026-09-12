@@ -25,7 +25,7 @@ export function CategoriesPage() {
     if (!user) return;
     try {
       setLoading(true);
-      setCategories(await api.getCategories(user.id));
+      setCategories(await api.getCategories());
       setError("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível carregar suas categorias.");
@@ -42,7 +42,7 @@ export function CategoriesPage() {
     event.preventDefault();
     if (!user || !newCategory.trim()) return;
     try {
-      await api.createCategory(user.id, newCategory);
+      await api.createCategory(newCategory);
       setNewCategory("");
       await load();
     } catch (err) {
@@ -53,7 +53,7 @@ export function CategoriesPage() {
   async function handleSave(categoryId: number) {
     if (!user) return;
     try {
-      await api.updateCategory(categoryId, user.id, editingName);
+      await api.updateCategory(categoryId, editingName);
       setEditingId(null);
       setEditingName("");
       await load();
@@ -65,7 +65,7 @@ export function CategoriesPage() {
   async function handleDelete(categoryId: number) {
     if (!user) return;
     try {
-      await api.deleteCategory(categoryId, user.id);
+      await api.deleteCategory(categoryId);
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível remover a categoria.");

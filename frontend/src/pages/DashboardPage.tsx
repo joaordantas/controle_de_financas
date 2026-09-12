@@ -22,8 +22,6 @@ export function DashboardPage() {
 
   useEffect(() => {
     if (!user) return;
-    const userId = user.id;
-
     async function loadDashboard() {
       try {
         setLoading(true);
@@ -33,9 +31,9 @@ export function DashboardPage() {
         setAccounts(null);
 
         const [profitResult, transactionResult, accountResult] = await Promise.allSettled([
-          api.getProfit(userId, period.start, period.end),
-          api.getTransactions(userId),
-          api.getAccounts(userId),
+          api.getProfit(period.start, period.end),
+          api.getTransactions(),
+          api.getAccounts(),
         ]);
 
         if (profitResult.status === "fulfilled") setProfit(profitResult.value);

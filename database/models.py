@@ -32,6 +32,19 @@ usuarios = Table(
     Column("tipo_perfil", String(80), nullable=False, server_default="Apenas Financeiro"),
 )
 
+sessoes = Table(
+    "sessoes", metadata,
+    Column("id", Integer, primary_key=True),
+    Column("usuario_id", ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False),
+    Column("token_hash", String(64), nullable=False, unique=True),
+    Column("csrf_hash", String(64), nullable=False),
+    Column("criada_em", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    Column("expira_em", DateTime(timezone=True), nullable=False),
+    Column("revogada_em", DateTime(timezone=True)),
+)
+Index("ix_sessoes_usuario", sessoes.c.usuario_id)
+Index("ix_sessoes_expiracao", sessoes.c.expira_em)
+
 categorias = Table(
     "categorias", metadata,
     Column("id", Integer, primary_key=True),
@@ -192,6 +205,6 @@ limites = Table(
 Index("ix_limites_usuario_mes", limites.c.usuario_id, limites.c.mes)
 
 TABLES_IN_DEPENDENCY_ORDER = [
-    usuarios, categorias, contas, transacoes, transferencias, cartoes,
+    usuarios, sessoes, categorias, contas, transacoes, transferencias, cartoes,
     faturas, compras_cartao, pagamentos_fatura, vendas, parcelas, limites,
 ]

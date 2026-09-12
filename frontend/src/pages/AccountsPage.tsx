@@ -50,7 +50,7 @@ export function AccountsPage() {
     if (!user) return;
     try {
       setLoading(true);
-      const [accountData, transferData] = await Promise.all([api.getAccounts(user.id, true), api.getTransfers(user.id)]);
+      const [accountData, transferData] = await Promise.all([api.getAccounts(true), api.getTransfers()]);
       setAccounts(accountData);
       setTransfers(transferData);
       const availableAccounts = accountData.filter((account) => account.ativo);
@@ -79,7 +79,7 @@ export function AccountsPage() {
     if (!user) return;
     try {
       setSaving(true);
-      await api.createAccount({ usuario_id: user.id, nome: name, tipo: accountType, saldo_inicial: initialBalance });
+      await api.createAccount({ nome: name, tipo: accountType, saldo_inicial: initialBalance });
       setName("");
       setInitialBalance(0);
       setMessage("Conta adicionada com sucesso.");
@@ -105,7 +105,7 @@ export function AccountsPage() {
     if (!user || !editingAccount) return;
     try {
       setSaving(true);
-      await api.updateAccount(editingAccount.id, { usuario_id: user.id, nome: editName, tipo: editType, saldo_inicial: editInitialBalance });
+      await api.updateAccount(editingAccount.id, { nome: editName, tipo: editType, saldo_inicial: editInitialBalance });
       setEditingAccount(null);
       setMessage("Conta atualizada e saldo recalculado.");
       setError("");
@@ -123,7 +123,7 @@ export function AccountsPage() {
     const action = account.ativo ? "desativar" : "reativar";
     if (!window.confirm(`${action[0].toUpperCase()}${action.slice(1)} a conta \"${account.nome}\"?`)) return;
     try {
-      await api.updateAccountStatus(account.id, user.id, !account.ativo);
+      await api.updateAccountStatus(account.id, !account.ativo);
       setMessage(account.ativo ? "Conta desativada." : "Conta reativada.");
       setError("");
       await load();
@@ -136,7 +136,7 @@ export function AccountsPage() {
   async function setPrimaryAccount(account: Account) {
     if (!user || account.principal) return;
     try {
-      await api.setPrimaryAccount(account.id, user.id);
+      await api.setPrimaryAccount(account.id);
       setMessage(`${account.nome} agora é sua conta principal.`);
       setError("");
       await load(account.id);
@@ -151,7 +151,7 @@ export function AccountsPage() {
     if (!user) return;
     try {
       setSaving(true);
-      await api.createTransfer({ usuario_id: user.id, conta_origem_id: sourceId, conta_destino_id: destinationId, valor: transferValue, descricao: description, data: transferDate });
+      await api.createTransfer({ conta_origem_id: sourceId, conta_destino_id: destinationId, valor: transferValue, descricao: description, data: transferDate });
       setTransferValue(0);
       setDescription("");
       setMessage("Transferência registrada sem alterar suas receitas ou despesas.");

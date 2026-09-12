@@ -90,6 +90,7 @@ select:focus-visible {
 }
 
 .app-shell { min-height: 100vh; }
+.route-loading { display: grid; min-height: 100vh; place-items: center; color: var(--text-secondary); font-size: 0.9rem; }
 
 .desktop-sidebar {
   position: fixed;

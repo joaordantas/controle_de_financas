@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -18,13 +19,19 @@ app = FastAPI(
     description="API da Nivra, plataforma de controle financeiro pessoal.",
 )
 
+local_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+configured_origins = [
+    origin.strip().rstrip("/")
+    for origin in os.environ.get("CORS_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-    allow_origin_regex=r"^http://(localhost|127\.0\.0\.1):517[3-9]$",
+    allow_origins=local_origins + configured_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "X-CSRF-Token"],
 )
 
 app.include_router(auth_router, prefix="/api")

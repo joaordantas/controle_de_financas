@@ -5,7 +5,6 @@ from fastapi import APIRouter, HTTPException, Query, status
 from backend.schemas.accounts import (
     AccountCreate,
     AccountResponse,
-    AccountPrimaryUpdate,
     AccountStatusUpdate,
     AccountUpdate,
     TransferCreate,
@@ -13,6 +12,7 @@ from backend.schemas.accounts import (
     TransferResponse,
     TransferUpdate,
 )
+from backend.dependencies.auth import CurrentUser, CurrentUserCsrf
 from services.conta_service import (
     alterar_status_conta_service,
     atualizar_conta_service,
@@ -32,24 +32,24 @@ router = APIRouter(tags=["accounts"])
 
 @router.get("/accounts", response_model=list[AccountResponse])
 def list_accounts(
-    usuario_id: int = Query(..., ge=1),
+    current_user: CurrentUser,
     incluir_inativas: bool = Query(False),
 ) -> list[AccountResponse]:
     return [
         AccountResponse(**conta)
-        for conta in listar_contas_formatadas(usuario_id, incluir_inativas)
+        for conta in listar_contas_formatadas(current_user.id, incluir_inativas)
     ]
 
 
 @router.post("/accounts", response_model=AccountResponse, status_code=status.HTTP_201_CREATED)
-def create_account(payload: AccountCreate) -> AccountResponse:
+def create_account(payload: AccountCreate, current_user: CurrentUserCsrf) -> AccountResponse:
     try:
         return AccountResponse(
             **criar_conta_service(
                 payload.nome,
                 payload.tipo,
                 payload.saldo_inicial,
-                payload.usuario_id,
+                current_user.id,
             )
         )
     except ValueError as exc:
@@ -59,7 +59,7 @@ def create_account(payload: AccountCreate) -> AccountResponse:
 
 
 @router.put("/accounts/{conta_id}", response_model=AccountResponse)
-def update_account(conta_id: int, payload: AccountUpdate) -> AccountResponse:
+def update_account(conta_id: int, payload: AccountUpdate, current_user: CurrentUserCsrf) -> AccountResponse:
     try:
         return AccountResponse(
             **atualizar_conta_service(
@@ -67,7 +67,7 @@ def update_account(conta_id: int, payload: AccountUpdate) -> AccountResponse:
                 payload.nome,
                 payload.tipo,
                 payload.saldo_inicial,
-                payload.usuario_id,
+                current_user.id,
             )
         )
     except ValueError as exc:
@@ -77,35 +77,35 @@ def update_account(conta_id: int, payload: AccountUpdate) -> AccountResponse:
 
 
 @router.patch("/accounts/{conta_id}/status", response_model=AccountResponse)
-def update_account_status(conta_id: int, payload: AccountStatusUpdate) -> AccountResponse:
+def update_account_status(conta_id: int, payload: AccountStatusUpdate, current_user: CurrentUserCsrf) -> AccountResponse:
     try:
         return AccountResponse(
-            **alterar_status_conta_service(conta_id, payload.ativo, payload.usuario_id)
+            **alterar_status_conta_service(conta_id, payload.ativo, current_user.id)
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.patch("/accounts/{conta_id}/primary", response_model=AccountResponse)
-def update_account_primary(conta_id: int, payload: AccountPrimaryUpdate) -> AccountResponse:
+def update_account_primary(conta_id: int, current_user: CurrentUserCsrf) -> AccountResponse:
     try:
         return AccountResponse(
-            **definir_conta_principal_service(conta_id, payload.usuario_id)
+            **definir_conta_principal_service(conta_id, current_user.id)
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/transfers", response_model=list[TransferListItem])
-def list_transfers(usuario_id: int = Query(..., ge=1)) -> list[TransferListItem]:
+def list_transfers(current_user: CurrentUser) -> list[TransferListItem]:
     return [
         TransferListItem(**transferencia)
-        for transferencia in listar_transferencias_formatadas(usuario_id)
+        for transferencia in listar_transferencias_formatadas(current_user.id)
     ]
 
 
 @router.post("/transfers", response_model=TransferResponse, status_code=status.HTTP_201_CREATED)
-def create_transfer(payload: TransferCreate) -> TransferResponse:
+def create_transfer(payload: TransferCreate, current_user: CurrentUserCsrf) -> TransferResponse:
     try:
         return TransferResponse(
             **criar_transferencia_service(
@@ -114,7 +114,7 @@ def create_transfer(payload: TransferCreate) -> TransferResponse:
                 payload.valor,
                 payload.descricao,
                 payload.data,
-                payload.usuario_id,
+                current_user.id,
             )
         )
     except ValueError as exc:
@@ -122,7 +122,7 @@ def create_transfer(payload: TransferCreate) -> TransferResponse:
 
 
 @router.put("/transfers/{transferencia_id}", response_model=TransferListItem)
-def update_transfer(transferencia_id: int, payload: TransferUpdate) -> TransferListItem:
+def update_transfer(transferencia_id: int, payload: TransferUpdate, current_user: CurrentUserCsrf) -> TransferListItem:
     try:
         return TransferListItem(
             **atualizar_transferencia_service(
@@ -132,7 +132,7 @@ def update_transfer(transferencia_id: int, payload: TransferUpdate) -> TransferL
                 payload.valor,
                 payload.descricao,
                 payload.data,
-                payload.usuario_id,
+                current_user.id,
             )
         )
     except ValueError as exc:
@@ -142,7 +142,7 @@ def update_transfer(transferencia_id: int, payload: TransferUpdate) -> TransferL
 @router.delete("/transfers/{transferencia_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_transfer(
     transferencia_id: int,
-    usuario_id: int = Query(..., ge=1),
+    current_user: CurrentUserCsrf,
 ) -> None:
-    if not deletar_transferencia_service(transferencia_id, usuario_id):
+    if not deletar_transferencia_service(transferencia_id, current_user.id):
         raise HTTPException(status_code=404, detail="Transferencia nao encontrada.")

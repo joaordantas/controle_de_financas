@@ -1,16 +1,16 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 AccountType = Literal["corrente", "poupanca", "digital", "dinheiro", "outro"]
 
 
 class AccountCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     nome: str = Field(min_length=1, max_length=60)
     tipo: AccountType = "digital"
     saldo_inicial: float = 0
-    usuario_id: int = Field(ge=1)
 
 
 class AccountUpdate(AccountCreate):
@@ -18,12 +18,8 @@ class AccountUpdate(AccountCreate):
 
 
 class AccountStatusUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     ativo: bool
-    usuario_id: int = Field(ge=1)
-
-
-class AccountPrimaryUpdate(BaseModel):
-    usuario_id: int = Field(ge=1)
 
 
 class AccountResponse(BaseModel):
@@ -39,12 +35,12 @@ class AccountResponse(BaseModel):
 
 
 class TransferCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     conta_origem_id: int = Field(ge=1)
     conta_destino_id: int = Field(ge=1)
     valor: float = Field(gt=0)
     descricao: str | None = Field(default=None, max_length=255)
     data: str
-    usuario_id: int = Field(ge=1)
 
 
 class TransferUpdate(TransferCreate):

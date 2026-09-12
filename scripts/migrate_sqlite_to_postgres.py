@@ -276,7 +276,7 @@ def _ensure_schema_is_current(connection: Any) -> None:
     if "alembic_version" not in inspector.get_table_names():
         raise RuntimeError("O destino nao possui migrations. Execute 'alembic upgrade head' primeiro.")
     version = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one_or_none()
-    if version != "13ecd0272470":
+    if version != "7a4c9d2e1f30":
         raise RuntimeError(
             f"Schema do destino esta em uma versao inesperada: {version or 'sem versao'}."
         )

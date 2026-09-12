@@ -1,14 +1,14 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CategoryCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     nome: str = Field(min_length=1, max_length=50)
-    usuario_id: int = Field(ge=1)
 
 
 class CategoryUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     nome: str = Field(min_length=1, max_length=50)
-    usuario_id: int = Field(ge=1)
 
 
 class CategoryResponse(BaseModel):

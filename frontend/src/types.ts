@@ -58,7 +58,6 @@ export interface Invoice {
 
 export interface Card {
   id: number;
-  usuario_id: number;
   nome: string;
   limite_total: number;
   limite_utilizado: number;

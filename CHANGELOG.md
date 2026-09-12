@@ -7,15 +7,28 @@ Todas as alterações importantes da Nivra serão documentadas neste arquivo. O 
 ### Added
 
 - acesso à saída da conta pelo menu mobile “Mais”, reutilizando o mesmo contexto de autenticação do desktop;
-- guia para a renomeação manual e segura do repositório GitHub e do projeto Vercel.
+- guia para a renomeação manual e segura do repositório GitHub e do projeto Vercel;
+- sessões server-side persistidas no PostgreSQL com expiração;
+- cookie de sessão HTTP-only, SameSite Lax e Secure em produção;
+- endpoint `/api/auth/me` para restaurar a sessão;
+- proteção CSRF em login, cadastro, logout e operações financeiras de escrita;
+- migration Alembic para a tabela `sessoes`;
+- testes de revogação, expiração, CORS, CSRF, falsificação de usuário e isolamento multiusuário.
 
 ### Changed
 
-- metadados públicos da API padronizados com a identidade Nivra.
+- metadados públicos da API padronizados com a identidade Nivra;
+- todas as APIs protegidas passam a obter o usuário da sessão no backend;
+- o frontend deixou de armazenar a identidade autenticada no `localStorage` e de enviar `usuario_id`.
+
+### Security
+
+- o banco armazena somente hashes dos tokens de sessão;
+- logout revoga a sessão no servidor;
+- CORS aceita origens locais exatas e origens adicionais configuradas explicitamente.
 
 ### Planned
 
-- autenticação segura validada pelo backend;
 - parcelamentos e recorrências pessoais;
 - orçamentos e metas financeiras;
 - motor determinístico de insights e área “Sua atenção”;

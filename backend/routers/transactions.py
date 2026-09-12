@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, status
 
+from backend.dependencies.auth import CurrentUser, CurrentUserCsrf
 from backend.schemas.transactions import (
     TransactionCreate,
     TransactionListItem,
@@ -18,13 +19,13 @@ router = APIRouter(prefix="/transactions", tags=["transactions"])
 
 
 @router.get("", response_model=list[TransactionListItem])
-def list_transactions(usuario_id: int = Query(..., ge=1)) -> list[TransactionListItem]:
-    dados = listar_transacoes_formatadas(usuario_id)
+def list_transactions(current_user: CurrentUser) -> list[TransactionListItem]:
+    dados = listar_transacoes_formatadas(current_user.id)
     return [TransactionListItem(**item) for item in dados]
 
 
 @router.post("", response_model=TransactionListItem, status_code=status.HTTP_201_CREATED)
-def create_transaction(payload: TransactionCreate) -> TransactionListItem:
+def create_transaction(payload: TransactionCreate, current_user: CurrentUserCsrf) -> TransactionListItem:
     try:
         transacao = criar_transacao_service(
             payload.valor,
@@ -32,7 +33,7 @@ def create_transaction(payload: TransactionCreate) -> TransactionListItem:
             payload.categoria_id,
             payload.comentario,
             payload.data,
-            payload.usuario_id,
+            current_user.id,
             payload.conta_id,
         )
         return TransactionListItem(**transacao)
@@ -44,6 +45,7 @@ def create_transaction(payload: TransactionCreate) -> TransactionListItem:
 def update_transaction(
     transacao_id: int,
     payload: TransactionUpdate,
+    current_user: CurrentUserCsrf,
 ) -> TransactionListItem:
     try:
         transacao = atualizar_transacao_service(
@@ -53,7 +55,7 @@ def update_transaction(
             payload.categoria_id,
             payload.comentario,
             payload.data,
-            payload.usuario_id,
+            current_user.id,
             payload.conta_id,
         )
         return TransactionListItem(**transacao)
@@ -64,12 +66,12 @@ def update_transaction(
 @router.delete("/{transacao_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_transaction(
     transacao_id: int,
-    usuario_id: int = Query(..., ge=1),
+    current_user: CurrentUserCsrf,
 ) -> None:
-    if not deletar_transacao_service(transacao_id, usuario_id):
+    if not deletar_transacao_service(transacao_id, current_user.id):
         raise HTTPException(status_code=404, detail="Transacao nao encontrada.")
 
 
 @router.get("/summary", response_model=TransactionSummary)
-def get_summary(usuario_id: int = Query(..., ge=1)) -> TransactionSummary:
-    return TransactionSummary(**obter_resumo_financeiro(usuario_id))
+def get_summary(current_user: CurrentUser) -> TransactionSummary:
+    return TransactionSummary(**obter_resumo_financeiro(current_user.id))

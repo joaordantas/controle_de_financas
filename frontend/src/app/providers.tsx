@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
+import { api } from "../services/api";
 import type { User } from "../types";
 
-const STORAGE_KEY = "controle-financas-user";
 const THEME_STORAGE_KEY = "financas-theme";
 
 export type Theme = "light" | "dark";
@@ -11,8 +11,9 @@ export type Theme = "light" | "dark";
 interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (user: User) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -46,38 +47,50 @@ function ThemeProvider({ children }: { children: ReactNode }) {
 }
 
 function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const rawUser = window.localStorage.getItem(STORAGE_KEY);
-
-    if (!rawUser) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(rawUser) as User;
-    } catch {
-      window.localStorage.removeItem(STORAGE_KEY);
-      return null;
-    }
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-      return;
+    let active = true;
+    async function restoreSession() {
+      window.localStorage.removeItem("controle-financas-user");
+      try {
+        const currentUser = await api.getCurrentUser();
+        if (active) setUser(currentUser);
+      } catch {
+        if (active) setUser(null);
+      } finally {
+        if (active) setIsLoading(false);
+      }
     }
+    void restoreSession();
+    return () => { active = false; };
+  }, []);
 
-    window.localStorage.removeItem(STORAGE_KEY);
-  }, [user]);
+  useEffect(() => {
+    const clearUnauthorizedSession = () => {
+      setUser(null);
+      setIsLoading(false);
+    };
+    window.addEventListener("nivra:unauthorized", clearUnauthorizedSession);
+    return () => window.removeEventListener("nivra:unauthorized", clearUnauthorizedSession);
+  }, []);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       isAuthenticated: Boolean(user),
+      isLoading,
       login: setUser,
-      logout: () => setUser(null),
+      logout: async () => {
+        try {
+          await api.logout();
+        } finally {
+          setUser(null);
+        }
+      },
     }),
-    [user],
+    [isLoading, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

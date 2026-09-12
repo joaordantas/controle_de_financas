@@ -1,12 +1,14 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class LoginRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     email: EmailStr
     senha: str = Field(min_length=6)
 
 
 class RegisterRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     usuario: str = Field(min_length=2, max_length=50)
     email: EmailStr
     senha: str = Field(min_length=6)
@@ -18,3 +20,7 @@ class UserResponse(BaseModel):
     usuario: str
     email: EmailStr
     tipo_perfil: str
+
+
+class CsrfResponse(BaseModel):
+    csrf_token: str

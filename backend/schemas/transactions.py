@@ -1,15 +1,15 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TransactionCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     valor: float = Field(gt=0)
     tipo: Literal["entrada", "saida"]
     categoria_id: int | None = Field(default=None, ge=1)
     comentario: str | None = Field(default=None, max_length=255)
     data: str
-    usuario_id: int = Field(ge=1)
     conta_id: int | None = Field(default=None, ge=1)
 
 

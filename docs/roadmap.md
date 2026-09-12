@@ -1,99 +1,205 @@
-# Roadmap público da Nivra
+# Roadmap — Nivra
 
-Este roadmap organiza a evolução da Nivra por capacidades do produto. As datas e versões podem mudar conforme validações técnicas e de uso.
+> Controle financeiro inteligente, simples e automatizado.
 
-## Foundation
+A Nivra busca reduzir ao máximo o tempo necessário para organizar, consultar e entender as finanças pessoais. O roadmap abaixo registra capacidades entregues e a ordem planejada; datas e versões podem mudar conforme as validações técnicas e de uso.
+
+## Fundação
 
 - [x] React e TypeScript
 - [x] FastAPI
-- [x] Rotas e navegação
 - [x] Interface responsiva
+- [x] Navegação desktop e mobile
+- [x] Design system e componentes reutilizáveis
 - [x] Tema claro e escuro
-- [x] Componentes reutilizáveis
+- [x] Deploy na Vercel
+- [x] Identidade visual Nivra
+- [x] Logout desktop e mobile
 
-## Core Finance
+## Núcleo financeiro
 
-- [x] Dashboard financeiro
-- [x] Contas e saldos
-- [x] Conta principal
-- [x] Receitas
-- [x] Despesas
+- [x] Contas financeiras e saldo por conta
+- [x] Saldo total
+- [x] Conta principal e conta mais utilizada
+- [x] Receitas e despesas
 - [x] Transferências neutras em receitas e despesas
 - [x] Categorias
-- [x] Histórico unificado
-- [x] Busca e filtros
+- [x] Histórico, busca e filtros
 - [x] Criação, edição e exclusão
+- [x] Dashboard financeiro
+- [x] Isolamento lógico entre usuários
 
-## Infrastructure
+## Infraestrutura
 
-- [x] PostgreSQL como banco oficial
-- [x] Neon como provider atual
-- [x] Persistência remota
-- [x] SQLAlchemy Core
-- [x] Alembic migrations
-- [x] Configuração serverless para Vercel
-- [x] Importador seguro do SQLite legado
-- [ ] Autenticação segura para produção
-- [ ] Sessão no backend com cookie HTTP-only
+- [x] PostgreSQL no Neon
+- [x] Persistência entre deployments
+- [x] SQLAlchemy Core e Psycopg 3
+- [x] Alembic e migrations versionadas
+- [x] `NUMERIC` para valores financeiros
+- [x] Foreign keys, constraints e índices úteis
+- [x] Operações atômicas
+- [x] Proteção dos testes contra o banco de produção
+- [x] Migração segura de SQLite para PostgreSQL
+- [x] Deploy FastAPI e React na Vercel
 
-## Cards and Invoices
+## Cartões e faturas — Alpha
 
-- [x] Cartões
+- [x] Cadastro, edição e ativação de cartões
 - [x] Limite total, utilizado e disponível
-- [x] Ciclos de fatura
-- [x] Fatura atual e histórico
+- [x] Datas de fechamento e vencimento
 - [x] Compras no cartão
-- [x] Pagamento integral por conta financeira
+- [x] Ciclos, fatura atual e histórico
+- [x] Status de fatura
+- [x] Pagamento integral integrado às contas
+- [x] Proteção contra pagamento duplicado
+- [x] Proteção contra dupla contabilização da despesa
 - [ ] Pagamentos parciais
 - [ ] Estornos e ajustes avançados
 
-## Financial Planning
+## Autenticação segura
 
-- [ ] Parcelamentos pessoais e projeções futuras
-- [ ] Transações recorrentes
-- [ ] Orçamentos por categoria
-- [ ] Alertas de orçamento
-- [ ] Metas financeiras
-- [ ] Projeções de comprometimento
+- [x] Sessões server-side armazenadas no PostgreSQL
+- [x] Cookie HTTP-only
+- [x] Cookie Secure em produção
+- [x] SameSite adequado
+- [x] Endpoint `/api/auth/me`
+- [x] Logout com revogação real
+- [x] Expiração de sessão
+- [x] Dependência `current_user` no FastAPI
+- [x] Remoção de `usuario_id` das APIs protegidas
+- [x] Remoção da autenticação baseada em `localStorage`
+- [x] Proteção CSRF
+- [x] Revisão de CORS
+- [x] Testes de falsificação de usuário
+- [x] Testes multiusuário
 
-## Intelligence
+Melhorias futuras de conta e segurança:
+
+- [ ] Recuperação e alteração de senha
+- [ ] Encerrar todas as sessões
+- [ ] Histórico de sessões e dispositivos
+- [ ] Rate limiting de login
+- [ ] Verificação de e-mail, se necessária
+
+## 1. Parcelamentos e recorrências
+
+### Parcelamentos
+
+- [ ] Compras parceladas
+- [ ] Quantidade, parcela atual e parcelas restantes
+- [ ] Distribuição entre faturas
+- [ ] Comprometimento do limite
+- [ ] Projeção de faturas futuras
+- [ ] Edição segura e cancelamento quando possível
+
+### Recorrências
+
+- [ ] Receitas e despesas recorrentes
+- [ ] Assinaturas
+- [ ] Frequência e próxima cobrança
+- [ ] Detecção de padrões recorrentes
+- [ ] Cancelamento de recorrência
+
+## 2. Orçamentos e metas
+
+### Orçamentos
+
+- [ ] Limite por categoria e limite mensal total
+- [ ] Acompanhamento, valor restante e percentual utilizado
+- [ ] Histórico por mês
+- [ ] Alertas em 50%, 75%, 90% e 100%
+
+### Metas
+
+- [ ] Valor alvo, valor acumulado e prazo
+- [ ] Progresso e valor necessário por mês
+- [ ] Metas concluídas e histórico
+
+## 3. Sincronização bancária e Open Finance
+
+- [ ] Escolha e validação de provider
+- [ ] Consentimento e gerenciamento de conexões
+- [ ] Sincronização de contas, saldos e transações
+- [ ] Atualização periódica, manual e por webhooks
+- [ ] Conciliação com lançamentos manuais
+- [ ] Prevenção de duplicações e resolução de conflitos
+- [ ] Sugestão de categoria e aprendizado estabelecimento → categoria
+- [ ] Identificação de assinaturas, transferências internas e movimentações incomuns
+
+## 4. Motor de inteligência financeira
 
 - [ ] Comparação entre períodos
-- [ ] Motor determinístico de insights
-- [ ] Detecção de gastos incomuns
-- [ ] Área “Sua atenção” baseada em regras
-- [ ] Lumi — assistente financeira inteligente
-- [ ] Consultas em linguagem natural
-- [ ] Ações financeiras com confirmação
+- [ ] Gastos e receitas por categoria
+- [ ] Maiores despesas
+- [ ] Tendência de gastos e economia
+- [ ] Gastos fora do padrão e recorrências
+- [ ] Projeção do mês
+- [ ] Comprometimento dos cartões
+- [ ] Situação de orçamentos e metas
+- [ ] Área “Sua atenção” baseada em regras determinísticas
 
-## Automation
+## 5. ✦ Lumi
 
-- [ ] Centro de notificações
-- [ ] Eventos financeiros
-- [ ] Alertas configuráveis
-- [ ] Resumo semanal
-- [ ] Resumo mensal
-- [ ] Notificações por WhatsApp
+Lumi será a assistente financeira inteligente da Nivra. A identidade está definida, mas a IA ainda não foi implementada.
 
-## Professional Mode — futuro
+- [ ] Consultas financeiras em linguagem natural
+- [ ] Criação e edição de transações com confirmação
+- [ ] Ações sobre categorias, orçamentos e metas
+- [ ] Consultas de contas, cartões e faturas
+- [ ] Tool calling para os services existentes
+- [ ] Contexto financeiro estruturado e memória de preferências
+- [ ] Garantia de que a IA nunca acessa SQL diretamente
 
-- [ ] Clientes
-- [ ] Vendas e serviços
-- [ ] Recebimentos
-- [ ] Estoque
-- [ ] Lucro e margens
-- [ ] Indicadores comerciais
+## 6. Notificações internas
+
+- [ ] `NotificationService` e eventos financeiros
+- [ ] Centro de notificações e sino no frontend
+- [ ] Estado lida/não lida e preferências
+- [ ] Alertas de orçamento e fatura
+- [ ] Gastos incomuns e progresso de metas
+- [ ] Resumos semanal e mensal
+
+## 7. WhatsApp
+
+- [ ] Integração oficial
+- [ ] Vinculação, consentimento e preferências
+- [ ] Alertas financeiros e de orçamento
+- [ ] Alertas de fatura
+- [ ] Resumos semanal e mensal
+
+## 8. Polimento e produção
+
+- [ ] Paginação e filtros server-side
+- [ ] Cache quando necessário
+- [ ] Error boundaries
+- [ ] Monitoramento e logs estruturados
+- [ ] Rate limiting
+- [ ] Acessibilidade e performance mobile
+- [ ] Auditoria de segurança, backup e recuperação
+- [ ] Política de privacidade, termos de uso e LGPD
+- [ ] Screenshots oficiais, onboarding e testes públicos
+
+## 9. Nivra Pro — futuro
+
+- [ ] Perfil profissional
+- [ ] Clientes, vendas e serviços
+- [ ] Parcelas a receber e cobranças
+- [ ] Produtos, estoque e custos
+- [ ] Margens, lucro e dashboard comercial
+- [ ] Lumi Pro aplicada ao negócio
 
 ## Direção de versionamento
 
 | Linha | Objetivo aproximado |
 | --- | --- |
-| `v0.1.x-alpha` | Core financeiro e infraestrutura persistente |
-| `v0.2.x-alpha` | Maturidade de cartões, faturas e parcelamentos |
-| `v0.3.x-alpha` | Planejamento financeiro, orçamentos e metas |
-| `v0.4.x-beta` | Insights e maturidade financeira |
-| `v0.5.x-beta` | Lumi e linguagem natural |
-| `v0.6.x-beta` | Notificações e automação |
+| `v0.1.x-alpha` | Core financeiro, cartões, PostgreSQL e deploy |
+| `v0.2.x-alpha` | Autenticação segura, sessões e segurança multiusuário |
+| `v0.3.x-alpha` | Parcelamentos, recorrências, orçamentos e metas |
+| `v0.4.x-alpha/beta` | Open Finance, sincronização e conciliação |
+| `v0.5.x-beta` | Inteligência financeira e “Sua atenção” |
+| `v0.6.x-beta` | Lumi, consultas e ações |
+| `v0.7.x-beta` | Notificações e WhatsApp |
+| `v0.8.x` / `v0.9.x` | Preparação para produção |
 | `v1.0.0` | Primeira versão pública considerada estável |
 
-Essa sequência é uma direção de produto. Uma versão só será promovida quando suas capacidades e limitações estiverem documentadas e validadas.
+A próxima etapa funcional é **Parcelamentos e recorrências**. A Nivra não avança automaticamente para ela sem uma atualização separada e revisada.

@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 InvoiceStatus = Literal["aberta", "fechada", "paga", "vencida"]
@@ -25,7 +25,7 @@ class InvoiceSummary(BaseModel):
 
 
 class CardCreate(BaseModel):
-    usuario_id: int = Field(ge=1)
+    model_config = ConfigDict(extra="forbid")
     nome: str = Field(min_length=1, max_length=60)
     limite_total: float = Field(gt=0)
     dia_fechamento: int = Field(ge=1, le=31)
@@ -37,13 +37,12 @@ class CardUpdate(CardCreate):
 
 
 class CardStatusUpdate(BaseModel):
-    usuario_id: int = Field(ge=1)
+    model_config = ConfigDict(extra="forbid")
     ativo: bool
 
 
 class CardResponse(BaseModel):
     id: int
-    usuario_id: int
     nome: str
     limite_total: float
     limite_utilizado: float
@@ -56,7 +55,7 @@ class CardResponse(BaseModel):
 
 
 class CardPurchaseCreate(BaseModel):
-    usuario_id: int = Field(ge=1)
+    model_config = ConfigDict(extra="forbid")
     cartao_id: int = Field(ge=1)
     valor: float = Field(gt=0)
     descricao: str = Field(min_length=1, max_length=255)
@@ -85,6 +84,6 @@ class InvoiceDetail(InvoiceSummary):
 
 
 class InvoicePaymentCreate(BaseModel):
-    usuario_id: int = Field(ge=1)
+    model_config = ConfigDict(extra="forbid")
     conta_id: int = Field(ge=1)
     data: str
