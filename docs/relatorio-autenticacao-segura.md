@@ -138,6 +138,21 @@ O arquivo versionado do Alembic continua sendo a fonte oficial para novos ambien
 alembic upgrade head
 ```
 
+## GitHub e produção
+
+O código principal da atualização foi registrado no commit `42b4e8b` (`feat(auth): concluir autenticação segura v0.2`) e enviado para a branch `main` do repositório Nivra.
+
+Após o deploy automático da Vercel, a aplicação pública foi validada em `https://nivra-finance.vercel.app`:
+
+- página de login carregada;
+- `/api/health`: `200`, com banco online;
+- `/openapi.json`: `200`;
+- `/api/auth/me` sem cookie: `401`, como esperado;
+- `/api/auth/me` e `/api/auth/csrf` presentes no OpenAPI;
+- `usuario_id` ausente do contrato público.
+
+O teste de login com um usuário real permanece uma verificação manual do proprietário, pois nenhuma credencial foi lida, solicitada ou criada durante esta atualização.
+
 ## Testes de segurança
 
 A nova suíte cobre:
